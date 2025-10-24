@@ -1,0 +1,101 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get release notes
+        id: release_notes
+        run: |
+          # Get the previous tag
+          PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || echo "")
+          
+          # Generate changelog
+          if [ -n "$PREVIOUS_TAG" ]; then
+            CHANGELOG=$(git log --pretty=format:"- %s" $PREVIOUS_TAG..HEAD)
+          else
+            CHANGELOG=$(git log --pretty=format:"- %s" --max-count=20)
+          fi
+          
+          # Create release notes
+          cat > release_notes.md << EOF
+          # 🚀 GSS HR System ${{ github.ref_name }} - Complete Admin Backend Integration
+          
+          ## ✨ New Features
+          - **Complete Admin Dashboard**: Real-time statistics and system overview
+          - **User Management System**: Full user approval/rejection workflow
+          - **Admin Settings**: Complete system configuration management
+          - **Admin Reports**: Live analytics and system activity tracking
+          - **System Activity Logging**: Comprehensive audit trail for all operations
+          
+          ## 🔧 Backend Integration
+          - **Real Database Connections**: All admin pages connected to Supabase
+          - **System Activity Tracking**: Automatic logging of all system activities
+          - **User Approval Workflow**: Complete user management with role assignment
+          - **Settings Persistence**: Real database storage for system settings
+          - **Live Analytics**: Real-time reports and statistics
+          
+          ## 🛠️ Technical Improvements
+          - **Removed Mock Data**: All hardcoded data replaced with real backend data
+          - **Activity Logging**: Comprehensive system activity tracking
+          - **Database Triggers**: Automatic activity logging for user operations
+          - **Error Handling**: Improved error handling and user feedback
+          - **Type Safety**: Full TypeScript support for all admin operations
+          
+          ## 📊 Admin Features
+          - **Dashboard**: Live statistics from real database
+          - **User Management**: Approve/reject users with role assignment
+          - **Settings**: Complete system configuration
+          - **Reports**: Live analytics and activity tracking
+          - **Activity Log**: Complete audit trail of system operations
+          
+          ## 🔒 Security & Compliance
+          - **User Approval System**: Admin approval required for new users
+          - **Role-Based Access**: Admin-only access to administrative features
+          - **Activity Tracking**: Complete audit trail for compliance
+          - **Data Validation**: Comprehensive input validation and error handling
+          
+          ## 🎯 Production Ready
+          - **Real Backend Data**: All admin pages use real database data
+          - **System Activity Logging**: Complete audit trail
+          - **User Management**: Full approval workflow
+          - **Settings Management**: Database-persisted configuration
+          - **Live Analytics**: Real-time reports and statistics
+          
+          ## 📋 Recent Changes
+          $CHANGELOG
+          
+          This release represents a complete transformation of the admin system from mock data to a fully functional, production-ready administrative interface with real backend integration.
+          EOF
+          
+          # Output the release notes
+          echo "RELEASE_NOTES<<EOF" >> $GITHUB_OUTPUT
+          cat release_notes.md >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: GSS HR System ${{ github.ref_name }} - Complete Admin Backend Integration
+          body: ${{ steps.release_notes.outputs.RELEASE_NOTES }}
+          draft: false
+          prerelease: false
+
+      - name: Build and Deploy
+        run: |
+          echo "🚀 Release ${{ github.ref_name }} created successfully!"
+          echo "📦 Production deployment should be automatically triggered"
+          echo "🔗 Check your hosting platform for deployment status"

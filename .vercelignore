@@ -1,0 +1,6 @@
+.next/server/app/(dashboard)/page_client-reference-manifest.js
+.next/server/app/(dashboard)/**/page_client-reference-manifest.js
+.next/server/**/page_client-reference-manifest.js
+.next/server/app/(dashboard)/dashboard/
+.next/server/app/(dashboard)/dashboard/**
+**/page_client-reference-manifest.js
