@@ -7,5 +7,3 @@ export async function POST(_: Request, { params }: { params: { id: string } }) {
   if (error) return NextResponse.json({ error: error.message }, { status: 400 })
   return NextResponse.redirect(new URL("/approvals", process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"))
 }
-
-

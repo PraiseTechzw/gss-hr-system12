@@ -42,5 +42,3 @@ export function ExportTableButton({ table, className }: { table: string; classNa
     </Button>
   )
 }
-
-

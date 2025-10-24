@@ -1,7 +1,8 @@
 import type React from "react"
 import { AppSidebar } from "@/components/app-sidebar"
 import DashboardHeader from "@/components/dashboard/header"
-import { createClient } from "@/lib/supabase/server"
+import { cookies } from "next/headers"
+import { AuthService } from "@/lib/auth"
 import { redirect } from "next/navigation"
 
 export default async function DashboardLayout({
@@ -9,24 +10,25 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const cookieStore = await cookies()
+  const token = cookieStore.get("auth-token")?.value
 
-  if (!user) {
+  if (!token) {
     redirect("/auth/login")
   }
 
-  // Since we now prevent unapproved users from logging in at the login level,
-  // we don't need to check approval status here anymore
-  // All users reaching this point are either approved or don't have admin_users records
+  const tokenResult = AuthService.verifyToken(token)
+  if (!tokenResult.valid || !tokenResult.user) {
+    redirect("/auth/login")
+  }
+
+  const user = await AuthService.getUserById(tokenResult.user.id)
 
   return (
     <div className="flex h-screen overflow-hidden bg-gray-50">
       <AppSidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <DashboardHeader />
+        <DashboardHeader user={user || undefined} />
         <main className="flex-1 overflow-y-auto">
           <div className="container mx-auto p-6">{children}</div>
         </main>

@@ -275,4 +275,3 @@ function generatePayslipHTML(payrollData: any): string {
     </table>
   `
 }
-

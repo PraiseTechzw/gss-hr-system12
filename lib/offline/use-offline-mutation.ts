@@ -30,5 +30,3 @@ export function useOfflineMutation<Args extends any[]>(mutate: MutationFn<Args>)
 
   return { run, isLoading, error }
 }
-
-

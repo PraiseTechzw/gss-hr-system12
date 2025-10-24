@@ -13,7 +13,7 @@ import {
   Users
 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { getRecentActivity, getTimeAgo } from "@/lib/database-utils-client"
+import { createClient } from "@/lib/supabase/client"
 
 interface ActivityItem {
   type: string
@@ -57,6 +57,17 @@ const getTypeColor = (type: string) => {
   }
 }
 
+const getTimeAgo = (timestamp: string) => {
+  const now = new Date()
+  const time = new Date(timestamp)
+  const diffInSeconds = Math.floor((now.getTime() - time.getTime()) / 1000)
+  
+  if (diffInSeconds < 60) return 'Just now'
+  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`
+  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`
+  return `${Math.floor(diffInSeconds / 86400)}d ago`
+}
+
 export function RecentActivity() {
   const [activities, setActivities] = useState<ActivityItem[]>([])
   const [loading, setLoading] = useState(true)
@@ -64,8 +75,27 @@ export function RecentActivity() {
   useEffect(() => {
     async function fetchActivity() {
       try {
-        const recentActivity = await getRecentActivity()
-        setActivities(recentActivity.slice(0, 5)) // Show top 5 activities
+        const supabase = createClient()
+        const { data, error } = await supabase
+          .from('system_activity')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(5)
+        
+        if (error) {
+          console.error("Error fetching activity:", error)
+          return
+        }
+        
+        const formattedActivities = data?.map(activity => ({
+          type: activity.action_type || 'system',
+          title: activity.description || 'System activity',
+          description: `Action: ${activity.action_type}`,
+          timestamp: activity.created_at,
+          icon: 'Clock'
+        })) || []
+        
+        setActivities(formattedActivities)
       } catch (error) {
         console.error("Error fetching recent activity:", error)
       } finally {

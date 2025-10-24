@@ -336,4 +336,3 @@ INSERT INTO system_settings (setting_key, setting_value, description) VALUES
 ('overtime_rate', '1.5', 'Overtime rate multiplier'),
 ('leave_balance_annual', '21', 'Annual leave balance in days'),
 ('payroll_frequency', 'monthly', 'Payroll processing frequency');
-

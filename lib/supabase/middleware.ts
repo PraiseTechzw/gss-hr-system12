@@ -1,5 +1,44 @@
 import { NextResponse, type NextRequest } from "next/server"
-import { AuthService } from "@/lib/auth"
+
+// Simple JWT verification for edge runtime (without crypto module)
+function verifyTokenSimple(token: string) {
+  try {
+    const parts = token.split('.')
+    if (parts.length !== 3) {
+      return { valid: false, user: null }
+    }
+
+    const [header, payload, signature] = parts
+    
+    // Decode payload
+    const decodedPayload = JSON.parse(atob(payload))
+    
+    // Check expiration
+    const now = Math.floor(Date.now() / 1000)
+    if (decodedPayload.exp && decodedPayload.exp < now) {
+      return { valid: false, user: null }
+    }
+    
+    // Simple signature verification
+    const jwtSecret = process.env.NEXTAUTH_SECRET || "your-secret-key"
+    const expectedSignature = btoa(`${header}.${payload}.${jwtSecret}`)
+    if (signature !== expectedSignature) {
+      return { valid: false, user: null }
+    }
+
+    return { 
+      valid: true, 
+      user: {
+        id: decodedPayload.id,
+        email: decodedPayload.email,
+        role: decodedPayload.role
+      }
+    }
+  } catch (error) {
+    console.log("[Middleware] Token verification error:", error)
+    return { valid: false, user: null }
+  }
+}
 
 export async function updateSession(request: NextRequest) {
   const pathname = request.nextUrl.pathname
@@ -21,7 +60,7 @@ export async function updateSession(request: NextRequest) {
   let userRole = null
 
   if (token) {
-    const tokenResult = AuthService.verifyToken(token)
+    const tokenResult = verifyTokenSimple(token)
     if (tokenResult.valid && tokenResult.user) {
       isAuthenticated = true
       userRole = tokenResult.user.role

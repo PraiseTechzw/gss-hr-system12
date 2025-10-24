@@ -72,5 +72,3 @@ export async function withStore<T>(
     tx.onabort = () => reject(tx.error)
   })
 }
-
-

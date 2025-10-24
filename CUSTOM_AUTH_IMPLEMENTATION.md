@@ -52,7 +52,7 @@ The GSS HR System now uses a custom authentication system built on top of Supaba
 
 The system uses a custom `user_profiles` table instead of Supabase Auth:
 
-```sql
+\`\`\`sql
 CREATE TABLE user_profiles (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     email VARCHAR(255) NOT NULL UNIQUE,
@@ -70,7 +70,7 @@ CREATE TABLE user_profiles (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
-```
+\`\`\`
 
 ### API Endpoints
 
@@ -154,18 +154,18 @@ CREATE TABLE user_profiles (
 ## Setup Instructions
 
 ### 1. Environment Configuration
-```env
+\`\`\`env
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
 SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 NEXTAUTH_SECRET=your_jwt_secret
-```
+\`\`\`
 
 ### 2. Database Setup
-```sql
+\`\`\`sql
 -- Run the complete setup script
 \i scripts/007_setup_complete_system.sql
-```
+\`\`\`
 
 ### 3. Default Login Credentials
 - **Admin**: admin@gss.com / admin123
@@ -254,6 +254,3 @@ If migrating from Supabase Auth:
 ---
 
 This custom authentication system provides a robust, secure, and flexible foundation for the GSS HR System while maintaining complete control over user management and security policies.
-
-
-

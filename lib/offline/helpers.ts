@@ -38,5 +38,3 @@ export async function selectRecent<T = any>(table: Table, sortKey: keyof T & str
     .sort((a: any, b: any) => new Date(b[sortKey]).getTime() - new Date(a[sortKey]).getTime())
     .slice(0, limit)
 }
-
-

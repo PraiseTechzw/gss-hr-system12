@@ -1,19 +1,25 @@
-import { createClient } from "@/lib/supabase/server"
+import type React from "react"
+import { cookies } from "next/headers"
+import { AuthService } from "@/lib/auth"
 import { redirect } from "next/navigation"
 
 export default async function SettingsLayout({ children }: { children: React.ReactNode }) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect("/auth/login")
+  const cookieStore = await cookies()
+  const token = cookieStore.get("auth-token")?.value
 
-  const { data: admin } = await supabase
-    .from("admin_users")
-    .select("role")
-    .eq("id", user.id)
-    .maybeSingle()
+  if (!token) {
+    redirect("/auth/login")
+  }
 
-  if (!admin) redirect("/")
+  const tokenResult = AuthService.verifyToken(token)
+  if (!tokenResult.valid || !tokenResult.user) {
+    redirect("/auth/login")
+  }
+
+  // Only admin and hr can access settings
+  if (!["admin", "hr"].includes(tokenResult.user.role)) {
+    redirect("/dashboard")
+  }
+
   return <>{children}</>
 }
-
-

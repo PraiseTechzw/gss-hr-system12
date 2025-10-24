@@ -249,6 +249,3 @@ The Admin Dashboard provides comprehensive management capabilities for your Zimb
 - ✅ **Security**: Role-based access control and activity logging
 
 **Ready to manage your HR system like a pro!** 🚀
-
-
-

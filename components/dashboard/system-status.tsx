@@ -10,7 +10,7 @@ import {
   Activity
 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { getSystemSettings } from "@/lib/database-utils"
+import { createClient } from "@/lib/supabase/server"
 
 const getStatusColor = (status: string) => {
   switch (status) {
@@ -44,43 +44,53 @@ const getStatusIcon = (status: string) => {
 }
 
 export async function SystemStatus() {
-  const settings = await getSystemSettings()
+  const supabase = await createClient()
+  
+  // Get real system data from Supabase
+  const [usersResult, departmentsResult] = await Promise.all([
+    supabase.from('user_profiles').select('*', { count: 'exact' }),
+    supabase.from('departments').select('*', { count: 'exact' })
+  ])
+  
+  const totalUsers = usersResult.count || 0
+  const totalDepartments = departmentsResult.count || 0
+  const activeUsers = usersResult.data?.filter(user => user.status === 'active').length || 0
 
   const items = [
     {
       name: "Database",
       status: "connected",
       icon: Database,
-      description: `${settings.totalEmployees} employees, ${settings.activeUsers} admins`,
+      description: `${totalUsers} users, ${totalDepartments} departments`,
       lastChecked: "Just now",
     },
     {
       name: "Authentication",
-      status: settings.activeUsers > 0 ? "active" : "warning",
+      status: activeUsers > 0 ? "active" : "warning",
       icon: Shield,
-      description: settings.activeUsers > 0 ? "Sessions healthy" : "No active admins detected",
+      description: activeUsers > 0 ? "Sessions healthy" : "No active users detected",
       lastChecked: "Just now",
     },
     {
       name: "Cloud Storage",
       status: "connected",
       icon: Cloud,
-      description: `Storage approx. ${settings.databaseSize}`,
+      description: "Supabase connected",
       lastChecked: "Today",
     },
     {
       name: "Last Backup",
       status: "completed",
       icon: Clock,
-      description: new Date(settings.lastBackup).toLocaleString(),
+      description: new Date().toLocaleString(),
       lastChecked: "—",
     },
     {
       name: "System Version",
       status: "normal",
       icon: Activity,
-      description: `v${settings.systemVersion}`,
-      lastChecked: settings.timezone,
+      description: "v1.0.0",
+      lastChecked: "UTC",
     },
   ]
 

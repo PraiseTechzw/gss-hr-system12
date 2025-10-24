@@ -51,5 +51,3 @@ export async function fullSync() {
   await syncUp()
   await syncDown()
 }
-
-

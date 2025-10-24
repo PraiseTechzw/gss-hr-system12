@@ -30,10 +30,10 @@ The system attempts to extract user names in this order:
 ## Database Changes
 
 ### New Function: `ensure_user_profile_exists`
-```sql
+\`\`\`sql
 CREATE OR REPLACE FUNCTION ensure_user_profile_exists(user_id uuid, user_email text)
 RETURNS boolean
-```
+\`\`\`
 
 This function:
 - Checks if a user profile already exists
@@ -57,21 +57,21 @@ The login client (`components/auth/login-client.tsx`) now:
 
 ### For New Installations
 The auto profile creation functionality is included in the main schema file:
-```sql
+\`\`\`sql
 \i scripts/000_complete_hr_system.sql
-```
+\`\`\`
 
 ### For Existing Installations
 Run the migration script to add the functionality:
-```sql
+\`\`\`sql
 \i scripts/007_add_auto_profile_creation.sql
-```
+\`\`\`
 
 ### Testing
 Verify the functionality works correctly:
-```sql
+\`\`\`sql
 \i scripts/008_test_auto_profile_creation.sql
-```
+\`\`\`
 
 ## Security Considerations
 
@@ -109,7 +109,7 @@ Verify the functionality works correctly:
 ### Default Values
 You can modify the default values in the `ensure_user_profile_exists` function:
 
-```sql
+\`\`\`sql
 -- Change default role
 'hr', -- Default role
 
@@ -118,7 +118,7 @@ You can modify the default values in the `ensure_user_profile_exists` function:
 
 -- Change default position
 'HR Staff', -- Default position
-```
+\`\`\`
 
 ### Customization
 The function can be customized to:
@@ -130,15 +130,15 @@ The function can be customized to:
 
 ### System Activity Logs
 Monitor auto-creation activity:
-```sql
+\`\`\`sql
 SELECT * FROM system_activity 
 WHERE action IN ('profile_auto_created', 'profile_creation_failed')
 ORDER BY created_at DESC;
-```
+\`\`\`
 
 ### Profile Statistics
 Track profile creation:
-```sql
+\`\`\`sql
 SELECT 
     role,
     COUNT(*) as count,
@@ -147,7 +147,7 @@ SELECT
 FROM user_profiles 
 WHERE created_at > NOW() - INTERVAL '30 days'
 GROUP BY role;
-```
+\`\`\`
 
 ## Troubleshooting
 

@@ -59,5 +59,3 @@ export default async function EmployeesReportPage() {
     </div>
   )
 }
-
-

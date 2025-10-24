@@ -5,7 +5,7 @@
 ### Step 1: Set Up Environment Variables
 Create a `.env.local` file in your project root with your Supabase credentials:
 
-```env
+\`\`\`env
 # Supabase Configuration
 NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key_here
@@ -16,17 +16,17 @@ NEXTAUTH_SECRET=your_secure_jwt_secret_here
 
 # Application URL
 NEXT_PUBLIC_BASE_URL=http://localhost:3000
-```
+\`\`\`
 
 ### Step 2: Set Up Supabase Database
 1. **Go to your Supabase project dashboard**
 2. **Open the SQL Editor**
 3. **Run the complete database setup script:**
 
-```sql
+\`\`\`sql
 -- Copy and paste the entire content of scripts/010_complete_hr_database.sql
 -- This will create all tables, functions, triggers, policies, and default users
-```
+\`\`\`
 
 ### Step 3: Default Login Credentials
 After running the database script, you can log in with these credentials:
@@ -38,11 +38,11 @@ After running the database script, you can log in with these credentials:
 | **HR Staff** | hr@gss.com | hr123 | Basic HR operations |
 
 ### Step 4: Start the Application
-```bash
+\`\`\`bash
 # The development server should already be running
 # If not, run:
 npm run dev
-```
+\`\`\`
 
 ### Step 5: Test Login
 1. **Open your browser** and go to `http://localhost:3000`
@@ -109,6 +109,3 @@ npm run dev
 ---
 
 **Ready to test?** Go to `http://localhost:3000` and try logging in with `admin@gss.com` / `admin123`!
-
-
-

@@ -23,5 +23,3 @@ export async function clearQueuedMutations() {
   const db = await openDatabase()
   return withStore(db, "mutations", "readwrite", (s) => s.clear())
 }
-
-

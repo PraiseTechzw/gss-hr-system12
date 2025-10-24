@@ -22,5 +22,3 @@ export async function approveLeave(id: string) {
   }
   await queueMutation({ table: "leave_requests", op: "update", payload: { id, status: "approved" } })
 }
-
-

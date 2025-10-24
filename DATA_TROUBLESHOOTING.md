@@ -5,11 +5,11 @@
 ### 1. Check Environment Variables
 First, verify your Supabase environment variables are correctly set:
 
-```bash
+\`\`\`bash
 # Check if these are set in your .env.local file
 NEXT_PUBLIC_SUPABASE_URL_NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_URL_NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
-```
+\`\`\`
 
 ### 2. Test API Endpoints
 Visit these debug endpoints in your browser:
@@ -22,9 +22,9 @@ These will show you exactly what's happening with your database connection and d
 ### 3. Check Database Content
 Run the verification script in your Supabase SQL editor:
 
-```sql
+\`\`\`sql
 \i scripts/009_verify_data_connection.sql
-```
+\`\`\`
 
 ## Common Issues and Solutions
 
@@ -34,10 +34,10 @@ Run the verification script in your Supabase SQL editor:
 **Solution**:
 1. Create `.env.local` file in your project root
 2. Add your Supabase credentials:
-```env
+\`\`\`env
 NEXT_PUBLIC_SUPABASE_URL_NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_URL_NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
-```
+\`\`\`
 3. Restart your development server
 
 ### Issue 2: Database Schema Not Created
@@ -45,17 +45,17 @@ NEXT_PUBLIC_SUPABASE_URL_NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
 
 **Solution**:
 1. Run the complete schema script:
-```sql
+\`\`\`sql
 \i scripts/000_complete_hr_system.sql
-```
+\`\`\`
 2. Create admin user:
-```sql
+\`\`\`sql
 \i scripts/001_create_admin_user.sql
-```
+\`\`\`
 3. Add sample data:
-```sql
+\`\`\`sql
 \i scripts/002_seed_sample_data.sql
-```
+\`\`\`
 
 ### Issue 3: RLS Policies Blocking Access
 **Symptoms**: Data exists in database but app shows empty results
@@ -70,9 +70,9 @@ NEXT_PUBLIC_SUPABASE_URL_NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
 
 **Solution**:
 1. Run the sample data script:
-```sql
+\`\`\`sql
 \i scripts/002_seed_sample_data.sql
-```
+\`\`\`
 2. Or manually add some test data
 
 ### Issue 5: User Profile Missing
@@ -81,9 +81,9 @@ NEXT_PUBLIC_SUPABASE_URL_NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
 **Solution**:
 1. Check if user exists in `user_profiles` table
 2. Run the auto-profile creation script:
-```sql
+\`\`\`sql
 \i scripts/007_add_auto_profile_creation.sql
-```
+\`\`\`
 
 ## Step-by-Step Debugging
 
@@ -115,15 +115,15 @@ NEXT_PUBLIC_SUPABASE_URL_NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
 If you need to create test data manually:
 
 ### Create Departments
-```sql
+\`\`\`sql
 INSERT INTO public.departments (name, description) VALUES
 ('Human Resources', 'HR Department'),
 ('IT', 'Information Technology'),
 ('Finance', 'Finance Department');
-```
+\`\`\`
 
 ### Create Sample Employees
-```sql
+\`\`\`sql
 INSERT INTO public.employees (
     employee_id, first_name, last_name, full_name, email, 
     position, hire_date, status, employment_status
@@ -132,10 +132,10 @@ INSERT INTO public.employees (
  'Developer', '2024-01-01', 'active', 'active'),
 ('EMP002', 'Jane', 'Smith', 'Jane Smith', 'jane@company.com', 
  'Manager', '2024-01-01', 'active', 'active');
-```
+\`\`\`
 
 ### Create User Profile
-```sql
+\`\`\`sql
 INSERT INTO public.user_profiles (
     id, email, first_name, last_name, full_name, 
     role, department, position, is_active
@@ -144,7 +144,7 @@ INSERT INTO public.user_profiles (
     'Your', 'Name', 'Your Name', 'admin', 
     'Administration', 'System Admin', true
 );
-```
+\`\`\`
 
 ## Browser Console Debugging
 

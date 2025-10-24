@@ -67,5 +67,3 @@ export default async function PayrollReportPage() {
     </div>
   )
 }
-
-

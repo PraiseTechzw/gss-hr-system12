@@ -1,21 +1,23 @@
-'use client'
+"use client"
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { Bell, Search, User, LogOut, Settings, Moon, Sun } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuLabel, 
-  DropdownMenuSeparator, 
-  DropdownMenuTrigger 
-} from '@/components/ui/dropdown-menu'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { toast } from 'sonner'
+import type React from "react"
+
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { Bell, Search, User, LogOut, Settings, Moon, Sun } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { toast } from "sonner"
 
 interface HeaderProps {
   user?: {
@@ -24,7 +26,7 @@ interface HeaderProps {
     first_name: string
     last_name: string
     full_name: string
-    role: 'admin' | 'manager' | 'hr'
+    role: "admin" | "manager" | "hr"
     department_id?: string
     position?: string
     status: string
@@ -32,34 +34,34 @@ interface HeaderProps {
 }
 
 export default function Header({ user }: HeaderProps) {
-  const [searchQuery, setSearchQuery] = useState('')
+  const [searchQuery, setSearchQuery] = useState("")
   const [darkMode, setDarkMode] = useState(false)
   const router = useRouter()
 
   const handleLogout = async () => {
     try {
-      const response = await fetch('/api/auth/logout', {
-        method: 'POST',
+      const response = await fetch("/api/auth/logout", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       })
 
       if (response.ok) {
-        toast.success('Logged out successfully', {
-          description: 'You have been signed out of your account',
+        toast.success("Logged out successfully", {
+          description: "You have been signed out of your account",
         })
-        router.push('/auth/login')
+        router.push("/auth/login")
         router.refresh()
       } else {
-        toast.error('Logout failed', {
-          description: 'There was an error signing you out',
+        toast.error("Logout failed", {
+          description: "There was an error signing you out",
         })
       }
     } catch (error) {
-      console.error('Logout error:', error)
-      toast.error('Connection error', {
-        description: 'Unable to sign out. Please try again.',
+      console.error("Logout error:", error)
+      toast.error("Connection error", {
+        description: "Unable to sign out. Please try again.",
       })
     }
   }
@@ -68,7 +70,7 @@ export default function Header({ user }: HeaderProps) {
     e.preventDefault()
     if (searchQuery.trim()) {
       // Implement search functionality
-      toast.info('Search functionality coming soon', {
+      toast.info("Search functionality coming soon", {
         description: `Searching for: ${searchQuery}`,
       })
     }
@@ -77,13 +79,13 @@ export default function Header({ user }: HeaderProps) {
   const toggleDarkMode = () => {
     setDarkMode(!darkMode)
     // Implement dark mode toggle
-    toast.info('Dark mode toggle coming soon', {
-      description: 'Theme switching will be available soon',
+    toast.info("Dark mode toggle coming soon", {
+      description: "Theme switching will be available soon",
     })
   }
 
   return (
-    <header className="bg-white border-b border-gray-200 px-4 py-3 lg:ml-64">
+    <header className="bg-white border-b border-gray-200 px-4 py-3">
       <div className="flex items-center justify-between">
         {/* Search */}
         <div className="flex-1 max-w-lg">
@@ -104,17 +106,8 @@ export default function Header({ user }: HeaderProps) {
         {/* Right side actions */}
         <div className="flex items-center space-x-4">
           {/* Dark mode toggle */}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={toggleDarkMode}
-            className="hidden sm:flex"
-          >
-            {darkMode ? (
-              <Sun className="h-4 w-4" />
-            ) : (
-              <Moon className="h-4 w-4" />
-            )}
+          <Button variant="ghost" size="sm" onClick={toggleDarkMode} className="hidden sm:flex">
+            {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </Button>
 
           {/* Notifications */}
@@ -122,8 +115,8 @@ export default function Header({ user }: HeaderProps) {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="relative">
                 <Bell className="h-4 w-4" />
-                <Badge 
-                  variant="destructive" 
+                <Badge
+                  variant="destructive"
                   className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center text-xs"
                 >
                   3
@@ -131,9 +124,7 @@ export default function Header({ user }: HeaderProps) {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-80">
-              <DropdownMenuLabel className="font-semibold">
-                Notifications
-              </DropdownMenuLabel>
+              <DropdownMenuLabel className="font-semibold">Notifications</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem className="flex items-start space-x-3 p-3">
                 <div className="w-2 h-2 bg-blue-500 rounded-full mt-2" />
@@ -171,9 +162,10 @@ export default function Header({ user }: HeaderProps) {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="flex items-center space-x-2">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src="" alt={user?.full_name} />
+                  <AvatarImage src="/placeholder.svg" alt={user?.full_name} />
                   <AvatarFallback className="bg-gradient-to-br from-blue-600 to-red-600 text-white text-sm font-semibold">
-                    {user?.first_name?.[0]}{user?.last_name?.[0]}
+                    {user?.first_name?.[0]}
+                    {user?.last_name?.[0]}
                   </AvatarFallback>
                 </Avatar>
                 <div className="hidden sm:block text-left">
@@ -183,9 +175,7 @@ export default function Header({ user }: HeaderProps) {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel className="font-semibold">
-                My Account
-              </DropdownMenuLabel>
+              <DropdownMenuLabel className="font-semibold">My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem className="flex items-center space-x-2">
                 <User className="h-4 w-4" />
@@ -196,7 +186,7 @@ export default function Header({ user }: HeaderProps) {
                 <span>Settings</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 className="flex items-center space-x-2 text-red-600 focus:text-red-600"
                 onClick={handleLogout}
               >

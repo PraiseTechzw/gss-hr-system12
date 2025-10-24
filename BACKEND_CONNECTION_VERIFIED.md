@@ -86,11 +86,11 @@
 ## 🔧 **Backend Configuration**
 
 ### **Environment Variables**
-```env
+\`\`\`env
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 NEXTAUTH_SECRET=your_jwt_secret
-```
+\`\`\`
 
 ### **Database Configuration**
 - **Connection Pooling**: Optimized for server-side operations
@@ -175,5 +175,3 @@ NEXTAUTH_SECRET=your_jwt_secret
 - ✅ **Real-time Monitoring**: Live system health monitoring
 
 **Your HR system backend is now enterprise-ready!** 🚀🇿🇼
-
-

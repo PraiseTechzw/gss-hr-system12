@@ -153,4 +153,3 @@ FROM
         ('info'), ('success'), ('warning'), ('info'), ('info')
     ) AS notification_types(type)
 LIMIT 25;
-

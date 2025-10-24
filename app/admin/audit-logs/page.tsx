@@ -408,5 +408,3 @@ export default function AuditLogs() {
     </DashboardLayout>
   )
 }
-
-

@@ -197,6 +197,3 @@ async function generatePayslipPDF(payslipData: any): Promise<Buffer> {
   // Convert to Buffer (placeholder implementation)
   return Buffer.from(pdfContent, 'utf-8')
 }
-
-
-

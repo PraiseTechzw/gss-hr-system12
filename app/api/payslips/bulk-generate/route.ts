@@ -216,6 +216,3 @@ async function generatePayslipsZIP(payslips: any[], payrollPeriod: any): Promise
   // Convert to Buffer (placeholder implementation)
   return Buffer.from(zipContent, 'utf-8')
 }
-
-
-

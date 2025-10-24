@@ -387,5 +387,3 @@ export default function SystemHealth() {
     </div>
   )
 }
-
-

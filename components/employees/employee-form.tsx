@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
+import { createClient } from "@/lib/supabase/client"
 
 type EmployeeFormData = {
   employee_id: string
@@ -107,12 +108,29 @@ export function EmployeeForm({ employee }: { employee?: EmployeeFormData & { id:
         return
       }
 
-      // Ask server to generate the next unique ID
-      const { data: nextId, error: rpcError } = await supabase.rpc("generate_next_employee_id")
-      if (rpcError) throw rpcError
+      // First try to get the next ID from existing employees
+      const { data: existingEmployees, error: fetchError } = await supabase
+        .from("employees")
+        .select("employee_id")
+        .like("employee_id", "EMP%")
+        .order("employee_id", { ascending: false })
+        .limit(1)
 
-      if (!nextId || typeof nextId !== "string") {
-        throw new Error("Failed to generate employee ID")
+      if (fetchError) throw fetchError
+
+      let nextId: string
+      if (existingEmployees && existingEmployees.length > 0) {
+        // Extract number from last employee ID and increment
+        const lastId = existingEmployees[0].employee_id
+        const match = lastId.match(/EMP(\d+)/)
+        if (match) {
+          const nextNum = parseInt(match[1]) + 1
+          nextId = `EMP${nextNum.toString().padStart(4, '0')}`
+        } else {
+          nextId = `EMP0001`
+        }
+      } else {
+        nextId = `EMP0001`
       }
 
       setFormData((prev) => ({ ...prev, employee_id: nextId }))
@@ -156,19 +174,64 @@ export function EmployeeForm({ employee }: { employee?: EmployeeFormData & { id:
     setError(null)
 
     try {
+      // Prepare data for database
+      const employeeData = {
+        employee_id: formData.employee_id,
+        first_name: formData.first_name,
+        last_name: formData.last_name,
+        full_name: `${formData.first_name} ${formData.last_name}`,
+        email: formData.email,
+        phone: formData.phone,
+        job_title: formData.job_title,
+        employment_status: formData.employment_status,
+        department: formData.department,
+        date_of_birth: formData.date_of_birth || null,
+        gender: formData.gender || null,
+        address: formData.address || null,
+        city: formData.city || null,
+        state: formData.state || null,
+        postal_code: formData.postal_code || null,
+        hire_date: formData.hire_date,
+        bank_name: formData.bank_name || null,
+        account_number: formData.account_number || null,
+        ifsc_code: formData.ifsc_code || null,
+        nostro_account_number: formData.nostro_account_number || null,
+        zwl_account_number: formData.zwl_account_number || null,
+        branch_code: formData.branch_code || null,
+        pan_number: formData.pan_number || null,
+        aadhar_number: formData.aadhar_number || null,
+        emergency_contact_name: formData.emergency_contact_name || null,
+        emergency_contact_phone: formData.emergency_contact_phone || null,
+        emergency_contact_relationship: formData.emergency_contact_relationship || null,
+        // Map employment_status to status for database compatibility
+        status: formData.employment_status,
+        // Map job_title to position for database compatibility
+        position: formData.job_title
+      }
+
       if (employee?.id) {
         // Update existing employee
-        const { error } = await supabase.from("employees").update(formData).eq("id", employee.id)
+        const { error } = await supabase.from("employees").update(employeeData).eq("id", employee.id)
 
         if (error) throw error
         toast.success("Employee updated", {
           description: `${formData.first_name} ${formData.last_name} saved successfully.`
         })
       } else {
-        // Create new employee
-        const { error } = await supabase.from("employees").insert([formData])
+        // Create new employee using API endpoint that bypasses RLS
+        const response = await fetch('/api/employees/create', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(employeeData)
+        })
 
-        if (error) throw error
+        if (!response.ok) {
+          const errorData = await response.json()
+          throw new Error(errorData.details || errorData.error || 'Failed to create employee')
+        }
+
         toast.success("Employee added", {
           description: `${formData.first_name} ${formData.last_name} created successfully.`
         })

@@ -48,6 +48,3 @@ SELECT 'Admin user created successfully!' as message,
        'admin@gss.com' as email,
        'admin123' as default_password,
        'Please change the password after first login' as security_note;
-
-
-

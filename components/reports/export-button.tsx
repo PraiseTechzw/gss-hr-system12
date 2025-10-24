@@ -71,5 +71,3 @@ export function ExportButton({ report, className }: Props) {
     </Button>
   )
 }
-
-

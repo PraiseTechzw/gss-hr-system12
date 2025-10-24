@@ -25,5 +25,3 @@ export function OfflineProvider({ children }: { children: React.ReactNode }) {
 
   return children as any
 }
-
-

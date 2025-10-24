@@ -12,13 +12,13 @@ This guide will help you set up the GSS HR System with Supabase as the database 
 
 ## Step 1: Install Dependencies
 
-```bash
+\`\`\`bash
 # Install all required dependencies
 npm install
 
 # Or if using pnpm
 pnpm install
-```
+\`\`\`
 
 ## Step 2: Set Up Supabase Project
 
@@ -36,7 +36,7 @@ pnpm install
 
 Create a `.env.local` file in your project root:
 
-```env
+\`\`\`env
 # Supabase Configuration
 NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key_here
@@ -47,7 +47,7 @@ NEXTAUTH_SECRET=your_secure_jwt_secret_here
 
 # Application URL
 NEXT_PUBLIC_BASE_URL=http://localhost:3000
-```
+\`\`\`
 
 ## Step 4: Database Setup
 
@@ -55,7 +55,7 @@ NEXT_PUBLIC_BASE_URL=http://localhost:3000
 
 2. **Run the setup scripts in order:**
 
-```sql
+\`\`\`sql
 -- 1. Clean existing data (if any)
 \i scripts/000_drop_all_tables.sql
 
@@ -71,23 +71,23 @@ NEXT_PUBLIC_BASE_URL=http://localhost:3000
 
 -- 5. Add sample data (optional)
 \i scripts/003_seed_sample_data.sql
-```
+\`\`\`
 
 **OR run the complete setup script:**
 
-```sql
+\`\`\`sql
 \i scripts/007_setup_complete_system.sql
-```
+\`\`\`
 
 ## Step 5: Start the Application
 
-```bash
+\`\`\`bash
 # Start the development server
 npm run dev
 
 # Or with pnpm
 pnpm dev
-```
+\`\`\`
 
 The application will be available at `http://localhost:3000`
 
@@ -243,6 +243,3 @@ For technical support or questions about the system:
 ---
 
 **Note**: This system is designed for internal HR management. Ensure proper security measures are in place before deploying to production.
-
-
-

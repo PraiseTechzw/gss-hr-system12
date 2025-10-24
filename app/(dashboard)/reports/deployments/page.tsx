@@ -93,5 +93,3 @@ export default async function DeploymentsReportPage() {
     </div>
   )
 }
-
-

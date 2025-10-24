@@ -50,6 +50,3 @@ SELECT 'HR user created successfully!' as message,
        'hr@gss.com' as email,
        'hr123' as default_password,
        'Please change the password after first login' as security_note;
-
-
-

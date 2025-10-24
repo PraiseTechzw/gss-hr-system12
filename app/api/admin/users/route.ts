@@ -25,19 +25,12 @@ export async function GET(request: NextRequest) {
 
     // Build query
     let query = supabase
-      .from('users')
+      .from('user_profiles')
       .select(`
         *,
-        departments (id, name),
-        employees (
-          id,
-          employee_number,
-          position,
-          employment_type,
-          active
-        )
+        departments (id, name)
       `)
-      .eq('is_active', status === 'active')
+      .eq('status', status === 'active' ? 'active' : 'inactive')
 
     // Apply filters
     if (role) {
@@ -113,7 +106,7 @@ export async function POST(request: NextRequest) {
 
     // Check if user already exists
     const { data: existingUser } = await supabase
-      .from('users')
+      .from('user_profiles')
       .select('id')
       .eq('email', email)
       .single()
@@ -129,13 +122,16 @@ export async function POST(request: NextRequest) {
 
     // Create user
     const { data: newUser, error: createError } = await supabase
-      .from('users')
+      .from('user_profiles')
       .insert({
         email,
+        first_name: fullName.split(' ')[0],
+        last_name: fullName.split(' ').slice(1).join(' '),
         full_name: fullName,
         role,
         department_id: departmentId || null,
-        is_active: true
+        status: 'active',
+        password_hash: hashedPassword
       })
       .select(`
         *,
@@ -214,7 +210,7 @@ export async function PUT(request: NextRequest) {
 
     // Get current user data for audit
     const { data: currentUser } = await supabase
-      .from('users')
+      .from('user_profiles')
       .select('*')
       .eq('id', userId)
       .single()
@@ -228,13 +224,17 @@ export async function PUT(request: NextRequest) {
     // Update user
     const updateData: any = {}
     if (email !== undefined) updateData.email = email
-    if (fullName !== undefined) updateData.full_name = fullName
+    if (fullName !== undefined) {
+      updateData.full_name = fullName
+      updateData.first_name = fullName.split(' ')[0]
+      updateData.last_name = fullName.split(' ').slice(1).join(' ')
+    }
     if (role !== undefined) updateData.role = role
     if (departmentId !== undefined) updateData.department_id = departmentId
-    if (isActive !== undefined) updateData.is_active = isActive
+    if (isActive !== undefined) updateData.status = isActive ? 'active' : 'inactive'
 
     const { data: updatedUser, error: updateError } = await supabase
-      .from('users')
+      .from('user_profiles')
       .update(updateData)
       .eq('id', userId)
       .select(`
@@ -310,7 +310,7 @@ export async function DELETE(request: NextRequest) {
 
     // Get user data for audit
     const { data: userToDelete } = await supabase
-      .from('users')
+      .from('user_profiles')
       .select('*')
       .eq('id', userId)
       .single()
@@ -323,8 +323,8 @@ export async function DELETE(request: NextRequest) {
 
     // Soft delete (deactivate) instead of hard delete
     const { error: deleteError } = await supabase
-      .from('users')
-      .update({ is_active: false })
+      .from('user_profiles')
+      .update({ status: 'inactive' })
       .eq('id', userId)
 
     if (deleteError) {
@@ -358,4 +358,3 @@ export async function DELETE(request: NextRequest) {
     }, { status: 500 })
   }
 }
-

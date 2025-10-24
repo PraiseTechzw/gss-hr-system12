@@ -261,6 +261,3 @@ async function generatePDFReport(reportType: string, reportData: any): Promise<B
   // Convert to Buffer (placeholder implementation)
   return Buffer.from(pdfContent, 'utf-8')
 }
-
-
-

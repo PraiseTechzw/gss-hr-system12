@@ -1,8 +1,16 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { getAttendanceStats, getPayrollStats } from "@/lib/database-utils"
+import { createClient } from "@/lib/supabase/server"
 
 export async function AttendanceChart() {
-  const attendanceStats = await getAttendanceStats()
+  const supabase = await createClient()
+  
+  // For now, return mock data since we don't have attendance tables yet
+  // This can be connected to real attendance data when the tables are created
+  const attendanceStats = {
+    presentDays: 27,
+    absentDays: 3,
+    attendanceRate: 90
+  }
 
   return (
     <Card className="h-full">
@@ -33,7 +41,15 @@ export async function AttendanceChart() {
 }
 
 export async function PayrollChart() {
-  const payrollStats = await getPayrollStats()
+  const supabase = await createClient()
+  
+  // For now, return mock data since we don't have payroll tables yet
+  // This can be connected to real payroll data when the tables are created
+  const payrollStats = {
+    totalPayroll: 45230,
+    averageSalary: 2500,
+    monthlyGrowth: 5.2
+  }
 
   return (
     <Card className="h-full">

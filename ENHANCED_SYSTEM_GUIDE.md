@@ -32,25 +32,25 @@
 ## 🔧 **Setup Instructions**
 
 ### **1. Install Dependencies**
-```bash
+\`\`\`bash
 npm install sonner @radix-ui/react-dropdown-menu @radix-ui/react-avatar
-```
+\`\`\`
 
 ### **2. Environment Setup**
 Create `.env.local` with your Supabase credentials:
-```env
+\`\`\`env
 NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key_here
 SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
 NEXTAUTH_SECRET=your_secure_jwt_secret_here
 NEXT_PUBLIC_BASE_URL=http://localhost:3000
-```
+\`\`\`
 
 ### **3. Database Setup**
 Run the complete database script in Supabase SQL Editor:
-```sql
+\`\`\`sql
 -- Copy and paste scripts/010_complete_hr_database.sql
-```
+\`\`\`
 
 ### **4. Test the System**
 1. **Start the server**: `npm run dev`
@@ -184,6 +184,3 @@ Run the complete database script in Supabase SQL Editor:
 **🎉 Your HR system now has professional-grade features with beautiful animations, toast notifications, and smooth navigation!**
 
 **Ready to test?** Go to `http://localhost:3000` and experience the enhanced system!
-
-
-

@@ -28,29 +28,29 @@ This is a comprehensive HR and Payroll Management System designed for HR departm
 ## Installation Steps
 
 ### 1. Drop Existing Tables
-```sql
+\`\`\`sql
 -- Run this first to clean the database
 \i scripts/000_drop_all_tables.sql
-```
+\`\`\`
 
 ### 2. Create New Schema
-```sql
+\`\`\`sql
 -- Create the complete HR system schema
 \i scripts/001_create_complete_hr_system.sql
-```
+\`\`\`
 
 ### 3. Create First Admin User
-```sql
+\`\`\`sql
 -- Replace YOUR_USER_ID_HERE with your actual user ID from Supabase Auth
 -- Replace your-email@example.com with your actual email
 \i scripts/002_create_first_admin.sql
-```
+\`\`\`
 
 ### 4. Seed Sample Data (Optional)
-```sql
+\`\`\`sql
 -- Create sample data for testing
 \i scripts/003_seed_sample_data.sql
-```
+\`\`\`
 
 ## Key Features
 
@@ -145,5 +145,3 @@ For technical support or questions about the system, please contact the system a
 - **v1.8** - Added comprehensive sample data
 - **v1.9** - Enhanced security and performance
 - **v2.0** - Complete system redesign with HR focus
-
-

@@ -97,7 +97,7 @@ The GSS HR & Payroll Management System implements a three-tier role-based access
 
 ## 📊 **Role Hierarchy**
 
-```
+\`\`\`
 ADMIN (System Administrator)
 ├── Full System Access
 ├── User Management
@@ -115,15 +115,15 @@ HR (HR Staff)
 ├── Attendance Management
 ├── Leave Processing
 └── Basic Reports
-```
+\`\`\`
 
 ## 🚀 **Implementation Details**
 
 ### **Database Schema**
-```sql
+\`\`\`sql
 -- User roles are stored in user_profiles table
 role text NOT NULL DEFAULT 'hr' CHECK (role IN ('admin', 'manager', 'hr'))
-```
+\`\`\`
 
 ### **Frontend Implementation**
 - **Sidebar Navigation** - Role-based filtering
@@ -138,11 +138,11 @@ role text NOT NULL DEFAULT 'hr' CHECK (role IN ('admin', 'manager', 'hr'))
 ## 🔧 **Configuration**
 
 ### **Environment Variables**
-```env
+\`\`\`env
 # Supabase configuration for role-based access
 NEXT_PUBLIC_SUPABASE_URL_NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_URL_NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
-```
+\`\`\`
 
 ### **Database Setup**
 1. Run `scripts/000_complete_hr_system.sql` - Creates complete schema
@@ -198,5 +198,3 @@ NEXT_PUBLIC_SUPABASE_URL_NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
 - **Admin** → Oversee system, manage users, configure settings
 
 This role-based system ensures proper access control while maintaining operational efficiency for the GSS HR & Payroll Management System.
-
-

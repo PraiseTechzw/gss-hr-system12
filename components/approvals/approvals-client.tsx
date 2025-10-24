@@ -66,5 +66,3 @@ export default function ApprovalsClient({ pendingLeaves }: { pendingLeaves: any[
     </div>
   )
 }
-
-

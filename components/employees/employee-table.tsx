@@ -11,7 +11,7 @@ import { Eye, Pencil, Trash2, Search, Filter, Download, Users, ChevronUp, Chevro
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-// Supabase client removed
+import { createClient } from "@/lib/supabase/client"
 
 type Employee = {
   id: string
@@ -21,9 +21,12 @@ type Employee = {
   email: string
   phone: string | null
   position: string
+  job_title?: string
   department_id: string | null
+  department?: string
   departments?: { name: string } | null
   status: string
+  employment_status?: string
   hire_date: string
 }
 
@@ -48,7 +51,7 @@ export function EmployeeTable({ employees }: { employees: Employee[] }) {
 
   // Get unique departments for filter
   const departments = useMemo(() => {
-    const depts = [...new Set(employees.map(emp => emp.departments?.name).filter(Boolean))]
+    const depts = [...new Set(employees.map(emp => emp.departments?.name || emp.department).filter(Boolean))]
     return depts.sort()
   }, [employees])
 
@@ -60,10 +63,10 @@ export function EmployeeTable({ employees }: { employees: Employee[] }) {
         emp.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         emp.employee_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
         emp.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        emp.position.toLowerCase().includes(searchTerm.toLowerCase())
+        (emp.job_title || emp.position).toLowerCase().includes(searchTerm.toLowerCase())
       
-      const matchesStatus = statusFilter === "all" || emp.status === statusFilter
-      const matchesDepartment = departmentFilter === "all" || emp.departments?.name === departmentFilter
+      const matchesStatus = statusFilter === "all" || emp.employment_status === statusFilter || emp.status === statusFilter
+      const matchesDepartment = departmentFilter === "all" || emp.departments?.name === departmentFilter || emp.department === departmentFilter
       
       return matchesSearch && matchesStatus && matchesDepartment
     })
@@ -362,20 +365,20 @@ export function EmployeeTable({ employees }: { employees: Employee[] }) {
                     </TableCell>
                     <TableCell>{employee.email}</TableCell>
                     <TableCell>{employee.phone || "N/A"}</TableCell>
-                    <TableCell>{employee.position}</TableCell>
-                    <TableCell>{employee.departments?.name || "N/A"}</TableCell>
+                    <TableCell>{employee.job_title || employee.position}</TableCell>
+                    <TableCell>{employee.departments?.name || employee.department || "N/A"}</TableCell>
                     <TableCell>
                       <Badge
-                        variant={employee.status === "active" ? "default" : "secondary"}
+                        variant={(employee.employment_status || employee.status) === "active" ? "default" : "secondary"}
                         className={
-                          employee.status === "active" 
+                          (employee.employment_status || employee.status) === "active" 
                             ? "bg-green-100 text-green-800 hover:bg-green-100" 
-                            : employee.status === "inactive"
+                            : (employee.employment_status || employee.status) === "inactive"
                             ? "bg-yellow-100 text-yellow-800"
                             : "bg-red-100 text-red-800"
                         }
                       >
-                        {employee.status}
+                        {employee.employment_status || employee.status}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
@@ -433,19 +436,19 @@ export function EmployeeTable({ employees }: { employees: Employee[] }) {
                 </div>
                 
                 <div className="space-y-2 mb-4">
-                  <p className="text-sm text-gray-600">{employee.position}</p>
-                  <p className="text-sm text-gray-500">{employee.departments?.name || "No Department"}</p>
+                  <p className="text-sm text-gray-600">{employee.job_title || employee.position}</p>
+                  <p className="text-sm text-gray-500">{employee.departments?.name || employee.department || "No Department"}</p>
                   <Badge
-                    variant={employee.status === "active" ? "default" : "secondary"}
+                    variant={(employee.employment_status || employee.status) === "active" ? "default" : "secondary"}
                     className={
-                      employee.status === "active" 
+                      (employee.employment_status || employee.status) === "active" 
                         ? "bg-green-100 text-green-800" 
-                        : employee.status === "inactive"
+                        : (employee.employment_status || employee.status) === "inactive"
                         ? "bg-yellow-100 text-yellow-800"
                         : "bg-red-100 text-red-800"
                     }
                   >
-                    {employee.status}
+                    {employee.employment_status || employee.status}
                   </Badge>
                 </div>
                 

@@ -33,16 +33,16 @@ This HR system is specifically designed for Zimbabwean companies and is fully co
 
 Run the complete database script in your Supabase SQL Editor:
 
-```sql
+\`\`\`sql
 -- Copy and paste the entire content of scripts/011_zimbabwe_hr_database.sql
 -- This will create all tables, functions, triggers, and sample data
-```
+\`\`\`
 
 ### **2. Environment Configuration**
 
 Create `.env.local` with your Supabase credentials:
 
-```env
+\`\`\`env
 # Supabase Configuration
 NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key_here
@@ -53,19 +53,19 @@ NEXTAUTH_SECRET=your_secure_jwt_secret_here
 
 # Application URL
 NEXT_PUBLIC_BASE_URL=http://localhost:3000
-```
+\`\`\`
 
 ### **3. Install Dependencies**
 
-```bash
+\`\`\`bash
 npm install sonner @radix-ui/react-dropdown-menu @radix-ui/react-avatar
-```
+\`\`\`
 
 ### **4. Start the Application**
 
-```bash
+\`\`\`bash
 npm run dev
-```
+\`\`\`
 
 ## 🔐 **Default Login Credentials**
 
@@ -78,7 +78,7 @@ npm run dev
 ## 📊 **ZIMRA Tax Compliance**
 
 ### **2025 USD Tax Brackets**
-```
+\`\`\`
 From        To          Rate    Deduct
 $0.00       $100.00    0%      0
 $100.01     $300.00    20%     20
@@ -86,7 +86,7 @@ $300.01     $1,000.00  25%     35
 $1,000.01   $2,000.00  30%     85
 $2,000.01   $3,000.00  35%     185
 $3,000.01+  ∞          40%     335
-```
+\`\`\`
 
 ### **Automatic Calculations**
 - **PAYE**: Calculated using ZIMRA brackets
@@ -97,27 +97,27 @@ $3,000.01+  ∞          40%     335
 ## 💼 **Payroll Management**
 
 ### **Single Payslip Generation**
-```bash
+\`\`\`bash
 POST /api/payslips/generate
 {
   "employeeId": "uuid",
   "payrollPeriodId": "uuid",
   "format": "pdf"
 }
-```
+\`\`\`
 
 ### **Bulk Payslip Generation**
-```bash
+\`\`\`bash
 POST /api/payslips/bulk-generate
 {
   "payrollPeriodId": "uuid",
   "departmentId": "uuid", // optional
   "format": "zip"
 }
-```
+\`\`\`
 
 ### **Payroll Calculation**
-```bash
+\`\`\`bash
 POST /api/payroll/calculate
 {
   "employeeId": "uuid",
@@ -131,12 +131,12 @@ POST /api/payroll/calculate
     "overtime": 0
   }
 }
-```
+\`\`\`
 
 ## 🏖️ **Leave Management**
 
 ### **Create Leave Request**
-```bash
+\`\`\`bash
 POST /api/leave/requests
 {
   "employeeId": "uuid",
@@ -145,17 +145,17 @@ POST /api/leave/requests
   "endDate": "2025-02-05",
   "reason": "Family vacation"
 }
-```
+\`\`\`
 
 ### **Approve/Reject Leave**
-```bash
+\`\`\`bash
 POST /api/leave/approve
 {
   "requestId": "uuid",
   "action": "approved", // or "rejected"
   "comments": "Approved by manager"
 }
-```
+\`\`\`
 
 ### **Leave Types**
 - **Annual Leave**: 21 days per year
@@ -167,19 +167,19 @@ POST /api/leave/approve
 ## 📈 **Compliance Reporting**
 
 ### **ZIMRA Report**
-```bash
+\`\`\`bash
 GET /api/reports/compliance?type=zimra&month=1&year=2025&format=pdf
-```
+\`\`\`
 
 ### **NSSA Report**
-```bash
+\`\`\`bash
 GET /api/reports/compliance?type=nssa&month=1&year=2025&format=pdf
-```
+\`\`\`
 
 ### **Summary Report**
-```bash
+\`\`\`bash
 GET /api/reports/compliance?type=summary&month=1&year=2025&format=pdf
-```
+\`\`\`
 
 ## 👥 **User Roles & Permissions**
 
@@ -227,7 +227,7 @@ GET /api/reports/compliance?type=summary&month=1&year=2025&format=pdf
 ## 📋 **Payslip Format**
 
 ### **Standard Payslip Layout**
-```
+\`\`\`
 GENIUS SECURITY (PVT) LTD
 ------------------------------------------
 Employee Number: 000001
@@ -249,7 +249,7 @@ NET PAID:          USD 1386.35
 
 LEAVE SUMMARY
 Annual Leave: 7 days remaining
-```
+\`\`\`
 
 ## 🔧 **API Endpoints**
 
@@ -339,6 +339,3 @@ Annual Leave: 7 days remaining
 5. **Go live** with your HR system!
 
 **For support or questions, contact your system administrator.**
-
-
-

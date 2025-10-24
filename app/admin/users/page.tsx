@@ -434,6 +434,3 @@ export default function UserManagement() {
     </DashboardLayout>
   )
 }
-
-
-

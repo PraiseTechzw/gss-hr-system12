@@ -30,6 +30,3 @@ export async function GET() {
     )
   }
 }
-
-
-

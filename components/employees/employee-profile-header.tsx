@@ -14,8 +14,10 @@ type Employee = {
   email: string
   phone: string | null
   job_title: string
+  position?: string
   department: string | null
   employment_status: string
+  status?: string
   hire_date: string
   date_of_birth: string | null
   gender: string | null
@@ -116,13 +118,13 @@ export function EmployeeProfileHeader({ employee }: EmployeeProfileHeaderProps) 
                   <Badge variant="outline" className="text-xs">
                     {employee.employee_id}
                   </Badge>
-                  <Badge className={getStatusColor(employee.employment_status)}>
-                    {employee.employment_status}
+                  <Badge className={getStatusColor(employee.employment_status || employee.status || 'active')}>
+                    {employee.employment_status || employee.status || 'active'}
                   </Badge>
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-lg font-semibold text-gray-900">{employee.job_title}</p>
+                <p className="text-lg font-semibold text-gray-900">{employee.job_title || employee.position}</p>
                 <p className="text-sm text-gray-500">{employee.department || 'No Department'}</p>
               </div>
             </div>
@@ -175,4 +177,3 @@ export function EmployeeProfileHeader({ employee }: EmployeeProfileHeaderProps) 
     </div>
   )
 }
-

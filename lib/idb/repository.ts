@@ -58,5 +58,3 @@ function txComplete(tx: IDBTransaction): Promise<void> {
     tx.onerror = () => reject(tx.error)
   })
 }
-
-

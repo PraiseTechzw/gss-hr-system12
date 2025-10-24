@@ -42,4 +42,3 @@ VALUES (
     'Your admin account has been created successfully. Please change your password after first login.',
     'info'
 );
-

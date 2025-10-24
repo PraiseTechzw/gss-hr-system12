@@ -16,5 +16,3 @@ export default async function ApprovalsPage() {
 
   return <ApprovalsClient pendingLeaves={pendingLeaves || []} />
 }
-
-
