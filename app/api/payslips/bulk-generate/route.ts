@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 export async function POST(request: NextRequest) {
   try {
     console.log('🔍 [BULK PAYSLIP] Starting bulk payslip generation...')
-    
+
     const body = await request.json()
     const { month, year, departmentId, format = 'json' } = body
 
@@ -192,7 +192,7 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('📄 [BULK PAYSLIP] Format requested:', format)
-    
+
     if (format === 'zip') {
       console.log('🔧 [BULK PAYSLIP] Generating ZIP file...')
       // Generate ZIP file with all payslips

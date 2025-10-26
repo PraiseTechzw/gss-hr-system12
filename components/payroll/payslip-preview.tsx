@@ -3,7 +3,7 @@
 import React from "react"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Print, Download, ArrowLeft } from "lucide-react"
+import { Printer, Download, ArrowLeft } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 
 interface PayslipPreviewProps {
@@ -31,7 +31,7 @@ export function PayslipPreview({ payslipData, isOpen, onClose, onPrint, onDownlo
               Back
             </Button>
             <Button onClick={onPrint} className="bg-[#a2141e] hover:bg-[#8a1119]">
-              <Download className="mr-2 h-4 w-4" />
+              <Printer className="mr-2 h-4 w-4" />
               Print / Download
             </Button>
           </div>
