@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { AuthService } from '@/lib/auth'
+import { SystemActivityLogger } from '@/lib/system-activity'
 import { cookies } from 'next/headers'
 
 export async function POST(request: NextRequest) {
@@ -67,6 +68,9 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
+
+    // Log user creation activity
+    await SystemActivityLogger.logEmployeeActivity('create_user', `${result.user?.first_name} ${result.user?.last_name}`, tokenResult.user.id)
 
     return NextResponse.json({
       success: true,
