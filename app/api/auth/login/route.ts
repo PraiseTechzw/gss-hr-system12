@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { AuthService } from '@/lib/auth-service'
+import { SystemActivityLogger } from '@/lib/system-activity'
 import { cookies } from 'next/headers'
 
 export async function POST(request: NextRequest) {
@@ -47,6 +48,10 @@ export async function POST(request: NextRequest) {
     console.log("[API] Cookie set successfully")
 
     console.log("[API] Login successful for user:", authResult.user.email)
+    
+    // Log successful login activity
+    await SystemActivityLogger.logAuthActivity('login', authResult.user.email, authResult.user.id)
+    
     return NextResponse.json({
       success: true,
       user: authResult.user,
