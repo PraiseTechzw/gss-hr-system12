@@ -15,7 +15,12 @@ import {
   Activity,
   Clock,
   Target,
-  AlertCircle
+  AlertCircle,
+  Eye,
+  Filter,
+  RefreshCw,
+  Settings,
+  Plus
 } from "lucide-react"
 import Link from "next/link"
 import { ReportsOverview } from "@/components/reports/reports-overview"
@@ -56,19 +61,25 @@ export default async function ReportsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+      {/* Enhanced Header */}
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Reports & Analytics</h1>
-          <p className="mt-1 text-gray-500">Comprehensive insights and data analysis</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Reports & Analytics</h1>
+          <p className="mt-1 text-gray-600 dark:text-gray-300">
+            Comprehensive insights and data analysis for your HR operations
+          </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline">
-            <Download className="mr-2 h-4 w-4" />
+          <Button variant="outline" className="gap-2">
+            <RefreshCw className="h-4 w-4" />
+            Refresh Data
+          </Button>
+          <Button variant="outline" className="gap-2">
+            <Download className="h-4 w-4" />
             Export All
           </Button>
-          <Button className="bg-[#a2141e] hover:bg-[#8a1119]">
-            <FileText className="mr-2 h-4 w-4" />
+          <Button className="bg-[#a2141e] hover:bg-[#8a1119] gap-2">
+            <Plus className="h-4 w-4" />
             Custom Report
           </Button>
         </div>
@@ -76,78 +87,78 @@ export default async function ReportsPage() {
 
       {/* Key Metrics Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
+        <Card className="hover:shadow-lg transition-shadow">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Employees</p>
-                <p className="text-2xl font-bold text-gray-900">{dashboardStats.totalEmployees}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Total Employees</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{dashboardStats.totalEmployees}</p>
               </div>
-              <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
-                <Users className="h-6 w-6 text-blue-600" />
+              <div className="h-12 w-12 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
+                <Users className="h-6 w-6 text-blue-600 dark:text-blue-400" />
               </div>
             </div>
             <div className="mt-4 flex items-center text-sm">
               <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
-              <span className="text-green-600 font-medium">{dashboardStats.activeEmployees}</span>
-              <span className="text-gray-500 ml-1">active employees</span>
+              <span className="text-green-600 dark:text-green-400 font-medium">{dashboardStats.activeEmployees}</span>
+              <span className="text-gray-500 dark:text-gray-400 ml-1">active employees</span>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="hover:shadow-lg transition-shadow">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Active Deployments</p>
-                <p className="text-2xl font-bold text-gray-900">{deploymentStats.activeCount}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Active Deployments</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{deploymentStats.activeCount}</p>
               </div>
-              <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
-                <MapPin className="h-6 w-6 text-green-600" />
+              <div className="h-12 w-12 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
+                <MapPin className="h-6 w-6 text-green-600 dark:text-green-400" />
               </div>
             </div>
             <div className="mt-4 flex items-center text-sm">
               <Target className="h-4 w-4 text-green-500 mr-1" />
-              <span className="text-green-600 font-medium">{deploymentRate}%</span>
-              <span className="text-gray-500 ml-1">deployment rate</span>
+              <span className="text-green-600 dark:text-green-400 font-medium">{deploymentRate}%</span>
+              <span className="text-gray-500 dark:text-gray-400 ml-1">deployment rate</span>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="hover:shadow-lg transition-shadow">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Payroll</p>
-                <p className="text-2xl font-bold text-gray-900">USD ${payrollStats.totalPayroll.toLocaleString()}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Total Payroll</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">USD ${payrollStats.totalPayroll.toLocaleString()}</p>
               </div>
-              <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
-                <DollarSign className="h-6 w-6 text-green-600" />
+              <div className="h-12 w-12 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
+                <DollarSign className="h-6 w-6 text-green-600 dark:text-green-400" />
               </div>
             </div>
             <div className="mt-4 flex items-center text-sm">
               <Activity className="h-4 w-4 text-blue-500 mr-1" />
-              <span className="text-blue-600 font-medium">USD ${Math.round(payrollStats.averageSalary).toLocaleString()}</span>
-              <span className="text-gray-500 ml-1">avg. salary</span>
+              <span className="text-blue-600 dark:text-blue-400 font-medium">USD ${Math.round(payrollStats.averageSalary).toLocaleString()}</span>
+              <span className="text-gray-500 dark:text-gray-400 ml-1">avg. salary</span>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="hover:shadow-lg transition-shadow">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Attendance Rate</p>
-                <p className="text-2xl font-bold text-gray-900">{attendanceStats.attendanceRate}%</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Attendance Rate</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{attendanceStats.attendanceRate}%</p>
               </div>
-              <div className="h-12 w-12 rounded-full bg-orange-100 flex items-center justify-center">
-                <AlertCircle className="h-6 w-6 text-orange-600" />
+              <div className="h-12 w-12 rounded-full bg-orange-100 dark:bg-orange-900 flex items-center justify-center">
+                <AlertCircle className="h-6 w-6 text-orange-600 dark:text-orange-400" />
               </div>
             </div>
             <div className="mt-4 flex items-center text-sm">
               <Clock className="h-4 w-4 text-orange-500 mr-1" />
-              <span className="text-orange-600 font-medium">{attendanceStats.presentDays}</span>
-              <span className="text-gray-500 ml-1">present days (30d)</span>
+              <span className="text-orange-600 dark:text-orange-400 font-medium">{attendanceStats.presentDays}</span>
+              <span className="text-gray-500 dark:text-gray-400 ml-1">present days (30d)</span>
             </div>
           </CardContent>
         </Card>
@@ -220,18 +231,28 @@ export default async function ReportsPage() {
         </CardContent>
       </Card>
 
-      {/* Report Categories */}
+      {/* Enhanced Report Categories */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Link href="/reports/employees">
-          <Card className="hover:shadow-md transition-shadow cursor-pointer">
+          <Card className="hover:shadow-lg transition-all duration-200 cursor-pointer group border-l-4 border-l-blue-500">
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
-                <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
-                  <Users className="h-6 w-6 text-blue-600" />
+                <div className="h-12 w-12 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Users className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                 </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900">Employee Reports</h3>
-                  <p className="text-sm text-gray-600">Performance, attendance, demographics</p>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-gray-900 dark:text-gray-100 group-hover:text-blue-600 transition-colors">
+                    Employee Reports
+                  </h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                    Performance, attendance, demographics
+                  </p>
+                  <div className="flex items-center gap-2 mt-2">
+                    <Badge variant="secondary" className="text-xs">
+                      {employees?.length || 0} employees
+                    </Badge>
+                    <Eye className="h-3 w-3 text-gray-400" />
+                  </div>
                 </div>
               </div>
             </CardContent>
@@ -239,15 +260,25 @@ export default async function ReportsPage() {
         </Link>
 
         <Link href="/reports/payroll">
-          <Card className="hover:shadow-md transition-shadow cursor-pointer">
+          <Card className="hover:shadow-lg transition-all duration-200 cursor-pointer group border-l-4 border-l-green-500">
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
-                <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
-                  <DollarSign className="h-6 w-6 text-green-600" />
+                <div className="h-12 w-12 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <DollarSign className="h-6 w-6 text-green-600 dark:text-green-400" />
                 </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900">Payroll Reports</h3>
-                  <p className="text-sm text-gray-600">Salary analysis, cost breakdown</p>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-gray-900 dark:text-gray-100 group-hover:text-green-600 transition-colors">
+                    Payroll Reports
+                  </h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                    Salary analysis, cost breakdown
+                  </p>
+                  <div className="flex items-center gap-2 mt-2">
+                    <Badge variant="secondary" className="text-xs">
+                      ${payrollStats.totalPayroll.toLocaleString()}
+                    </Badge>
+                    <Eye className="h-3 w-3 text-gray-400" />
+                  </div>
                 </div>
               </div>
             </CardContent>
@@ -255,15 +286,25 @@ export default async function ReportsPage() {
         </Link>
 
         <Link href="/reports/deployments">
-          <Card className="hover:shadow-md transition-shadow cursor-pointer">
+          <Card className="hover:shadow-lg transition-all duration-200 cursor-pointer group border-l-4 border-l-purple-500">
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
-                <div className="h-12 w-12 rounded-full bg-purple-100 flex items-center justify-center">
-                  <MapPin className="h-6 w-6 text-purple-600" />
+                <div className="h-12 w-12 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <MapPin className="h-6 w-6 text-purple-600 dark:text-purple-400" />
                 </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900">Deployment Reports</h3>
-                  <p className="text-sm text-gray-600">Site efficiency, coverage analysis</p>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-gray-900 dark:text-gray-100 group-hover:text-purple-600 transition-colors">
+                    Deployment Reports
+                  </h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                    Site efficiency, coverage analysis
+                  </p>
+                  <div className="flex items-center gap-2 mt-2">
+                    <Badge variant="secondary" className="text-xs">
+                      {deployments?.length || 0} deployments
+                    </Badge>
+                    <Eye className="h-3 w-3 text-gray-400" />
+                  </div>
                 </div>
               </div>
             </CardContent>

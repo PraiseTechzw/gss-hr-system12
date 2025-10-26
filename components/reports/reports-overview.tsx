@@ -82,9 +82,26 @@ export function ReportsOverview({
       : 0
 
     // Payroll metrics
-    const totalPayroll = payrollRecords.reduce((sum, record) => sum + record.net_salary, 0)
+    const totalPayroll = payrollRecords.reduce((sum, record) => sum + (record.net_salary || 0), 0)
     const averagePayroll = payrollRecords.length > 0 ? totalPayroll / payrollRecords.length : 0
-    const payrollGrowth = 8.5 // Mock growth percentage
+    
+    // Calculate real payroll growth by comparing current month to previous month
+    const currentMonth = new Date().getMonth()
+    const currentYear = new Date().getFullYear()
+    const currentMonthRecords = payrollRecords.filter(record => {
+      const recordDate = new Date(record.created_at || record.year, record.month - 1)
+      return recordDate.getMonth() === currentMonth && recordDate.getFullYear() === currentYear
+    })
+    const previousMonthRecords = payrollRecords.filter(record => {
+      const recordDate = new Date(record.created_at || record.year, record.month - 1)
+      const prevMonth = currentMonth === 0 ? 11 : currentMonth - 1
+      const prevYear = currentMonth === 0 ? currentYear - 1 : currentYear
+      return recordDate.getMonth() === prevMonth && recordDate.getFullYear() === prevYear
+    })
+    
+    const currentMonthTotal = currentMonthRecords.reduce((sum, record) => sum + (record.net_salary || 0), 0)
+    const previousMonthTotal = previousMonthRecords.reduce((sum, record) => sum + (record.net_salary || 0), 0)
+    const payrollGrowth = previousMonthTotal > 0 ? ((currentMonthTotal - previousMonthTotal) / previousMonthTotal) * 100 : 0
 
     // Attendance metrics
     const presentCount = attendanceRecords.filter(a => a.status === 'present').length
@@ -99,7 +116,7 @@ export function ReportsOverview({
       deploymentEfficiency,
       totalPayroll,
       averagePayroll,
-      payrollGrowth,
+      payrollGrowth: Math.round(payrollGrowth * 100) / 100,
       attendanceRate
     }
   }, [employees, deployments, payrollRecords, attendanceRecords])

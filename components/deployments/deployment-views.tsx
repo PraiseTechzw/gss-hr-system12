@@ -8,8 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input"
 import { Table, Map, Calendar, Search, Filter, Download, Plus, Grid, List, BarChart3, TrendingUp, Users, Clock, DollarSign } from "lucide-react"
 import { DeploymentTable } from "./deployment-table"
-import { DeploymentMap } from "./deployment-map"
-import { DeploymentCalendar } from "./deployment-calendar"
+import { DeploymentMap } from "./deployment-map-enhanced"
+import { DeploymentCalendar } from "./deployment-calendar-enhanced"
 import Link from "next/link"
 
 type Deployment = {

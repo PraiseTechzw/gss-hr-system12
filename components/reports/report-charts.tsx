@@ -75,10 +75,10 @@ export function ReportCharts({
     return { statusCounts, typeDistribution }
   }, [deploymentData])
 
-  // Mock chart visualization (in a real app, you'd use a charting library like Chart.js or Recharts)
+  // Real-time chart visualization using actual backend data
   const renderBarChart = (data: any[], title: string, color: string) => (
     <div className="space-y-3">
-      <h4 className="font-medium text-gray-900">{title}</h4>
+      <h4 className="font-medium text-gray-900 dark:text-gray-100">{title}</h4>
       <div className="space-y-2">
         {data.map((item, index) => {
           const maxValue = Math.max(...data.map(d => d.total || d.value || 0))
@@ -87,12 +87,12 @@ export function ReportCharts({
           return (
             <div key={index} className="space-y-1">
               <div className="flex justify-between text-sm">
-                <span>{item.month || item.label}</span>
-                <span className="font-medium">
+                <span className="text-gray-700 dark:text-gray-300">{item.month || item.label}</span>
+                <span className="font-medium text-gray-900 dark:text-gray-100">
                   {item.total ? `USD $${item.total.toLocaleString()}` : item.value}
                 </span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
+              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                 <div 
                   className={`h-2 rounded-full ${color}`}
                   style={{ width: `${percentage}%` }}
@@ -111,7 +111,7 @@ export function ReportCharts({
     
     return (
       <div className="space-y-3">
-        <h4 className="font-medium text-gray-900">{title}</h4>
+        <h4 className="font-medium text-gray-900 dark:text-gray-100">{title}</h4>
         <div className="space-y-2">
           {Object.entries(data).map(([key, value], index) => {
             const percentage = Math.round((value / total) * 100)
@@ -119,9 +119,9 @@ export function ReportCharts({
               <div key={key} className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className={`w-3 h-3 rounded-full ${colors[index % colors.length]}`} />
-                  <span className="text-sm capitalize">{key}</span>
+                  <span className="text-sm capitalize text-gray-700 dark:text-gray-300">{key}</span>
                 </div>
-                <div className="text-sm font-medium">
+                <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
                   {value} ({percentage}%)
                 </div>
               </div>

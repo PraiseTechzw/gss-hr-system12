@@ -191,13 +191,13 @@ export function QuickReports() {
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
             <FileText className="h-5 w-5" />
             Quick Reports
           </CardTitle>
           <div className="flex items-center gap-2">
-            <Filter className="h-4 w-4 text-gray-500" />
-            <span className="text-sm text-gray-600">All Reports</span>
+            <Filter className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+            <span className="text-sm text-gray-600 dark:text-gray-300">All Reports</span>
           </div>
         </div>
       </CardHeader>
@@ -208,21 +208,21 @@ export function QuickReports() {
             return (
               <div 
                 key={report.id} 
-                className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
               >
                 <div className="flex items-center gap-4">
-                  <div className={`p-3 rounded-full ${report.bgColor}`}>
+                  <div className={`p-3 rounded-full ${report.bgColor} dark:opacity-80`}>
                     <ReportIcon className={`h-5 w-5 ${report.color}`} />
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <h4 className="font-medium text-gray-900">{report.title}</h4>
+                      <h4 className="font-medium text-gray-900 dark:text-gray-100">{report.title}</h4>
                       <Badge variant="outline" className="text-xs">
                         {report.type}
                       </Badge>
                     </div>
-                    <p className="text-sm text-gray-600 mb-2">{report.description}</p>
-                    <div className="flex items-center gap-4 text-xs text-gray-500">
+                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">{report.description}</p>
+                    <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
                       <span>Last generated: {report.lastGenerated}</span>
                       <span>•</span>
                       <span>{report.records} records</span>
