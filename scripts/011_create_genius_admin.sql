@@ -49,3 +49,5 @@ SELECT 'Genius Security admin user created successfully!' as message,
        'admin@geniussecurity.co.zw' as email,
        'admin123' as default_password,
        'Please change the password after first login' as security_note;
+
+

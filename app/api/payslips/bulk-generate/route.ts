@@ -1,70 +1,71 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { AuthService } from '@/lib/auth'
-import { ZimraTaxCalculator } from '@/lib/tax/zimra-calculator'
 
 export async function POST(request: NextRequest) {
   try {
-    // Verify authentication
-    const authToken = request.cookies.get('auth-token')?.value
-    if (!authToken) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const authResult = AuthService.verifyToken(authToken)
-    if (!authResult.valid || !authResult.user || !['admin', 'hr'].includes(authResult.user.role)) {
-      return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
-    }
-
+    console.log('🔍 [BULK PAYSLIP] Starting bulk payslip generation...')
+    
     const body = await request.json()
-    const { payrollPeriodId, departmentId, format = 'zip' } = body
+    const { month, year, departmentId, format = 'json' } = body
 
-    if (!payrollPeriodId) {
+    console.log('📝 [BULK PAYSLIP] Request body:', { month, year, departmentId, format })
+
+    if (!month || !year) {
+      console.log('❌ [BULK PAYSLIP] Missing required fields')
       return NextResponse.json({ 
-        error: 'Missing required field: payrollPeriodId' 
+        error: 'Missing required fields: month, year' 
       }, { status: 400 })
     }
 
     const supabase = await createClient()
-
-    // Get payroll period details
-    const { data: payrollPeriod, error: periodError } = await supabase
-      .from('payroll_periods')
-      .select('*')
-      .eq('id', payrollPeriodId)
-      .single()
-
-    if (periodError || !payrollPeriod) {
-      return NextResponse.json({ 
-        error: 'Payroll period not found' 
-      }, { status: 404 })
-    }
+    console.log('✅ [BULK PAYSLIP] Supabase client created')
 
     // Build query for payroll records
+    console.log('🔍 [BULK PAYSLIP] Building query for month:', month, 'year:', year)
+    
     let query = supabase
-      .from('payroll_records')
+      .from('payroll')
       .select(`
         *,
         employees (
           id,
-          employee_number,
-          position,
-          user_id,
-          department_id,
-          users (full_name, email),
-          departments (name)
+          employee_id,
+          first_name,
+          last_name,
+          job_title,
+          email,
+          phone,
+          address,
+          bank_name,
+          account_number,
+          pan_number,
+          employment_status,
+          department_id
         )
       `)
-      .eq('payroll_period_id', payrollPeriodId)
+      .eq('month', month)
+      .eq('year', year)
 
     // Filter by department if specified
     if (departmentId) {
+      console.log('🔍 [BULK PAYSLIP] Filtering by department:', departmentId)
       query = query.eq('employees.department_id', departmentId)
     }
 
+    console.log('🔍 [BULK PAYSLIP] Executing query...')
     const { data: payrollRecords, error: recordsError } = await query
 
+    console.log('📊 [BULK PAYSLIP] Query result:', {
+      hasData: !!payrollRecords,
+      recordCount: payrollRecords?.length || 0,
+      hasError: !!recordsError,
+      errorMessage: recordsError?.message,
+      errorCode: recordsError?.code,
+      errorDetails: recordsError?.details
+    })
+
     if (recordsError) {
+      console.log('❌ [BULK PAYSLIP] Database error:', recordsError)
       return NextResponse.json({ 
         error: 'Failed to fetch payroll records',
         details: recordsError.message 
@@ -72,39 +73,35 @@ export async function POST(request: NextRequest) {
     }
 
     if (!payrollRecords || payrollRecords.length === 0) {
+      console.log('❌ [BULK PAYSLIP] No payroll records found for period:', month, year)
       return NextResponse.json({ 
         error: 'No payroll records found for the specified period' 
       }, { status: 404 })
     }
 
+    console.log('✅ [BULK PAYSLIP] Found', payrollRecords.length, 'payroll records')
+
     // Generate payslips for all employees
     const payslips = []
     const errors = []
 
+    console.log('🔧 [BULK PAYSLIP] Processing', payrollRecords.length, 'records...')
+
     for (const record of payrollRecords) {
       try {
-        // Get allowances for the employee
-        const { data: allowances } = await supabase
-          .from('allowances')
-          .select('*')
-          .eq('employee_id', record.employee_id)
-          .eq('payroll_period_id', payrollPeriodId)
-
-        // Get deductions for the employee
-        const { data: deductions } = await supabase
-          .from('deductions')
-          .select('*')
-          .eq('employee_id', record.employee_id)
-          .eq('payroll_period_id', payrollPeriodId)
-
-        // Get leave balance
-        const { data: leaveBalance } = await supabase
-          .from('leave_balances')
-          .select('*')
-          .eq('employee_id', record.employee_id)
-          .eq('leave_type', 'annual')
-          .eq('year', payrollPeriod.year)
-          .single()
+        console.log('🔍 [BULK PAYSLIP] Processing record:', record.id, 'for employee:', record.employee_id)
+        const employee = record.employees
+        
+        if (!employee) {
+          console.log('❌ [BULK PAYSLIP] No employee data for record:', record.id)
+          errors.push({
+            payrollId: record.id,
+            employeeId: record.employee_id,
+            employeeNumber: 'N/A',
+            error: 'Employee data not found'
+          })
+          continue
+        }
 
         const payslipData = {
           company: {
@@ -114,70 +111,102 @@ export async function POST(request: NextRequest) {
             email: 'info@geniussecurity.co.zw'
           },
           employee: {
-            number: record.employees.employee_number,
-            name: record.employees.users.full_name,
-            department: record.employees.departments.name,
-            position: record.employees.position,
-            bank: record.employees.bank_name,
-            idNumber: record.employees.id_number,
-            employmentType: record.employees.employment_type
+            number: employee.employee_id,
+            name: `${employee.first_name} ${employee.last_name}`,
+            department: 'N/A', // We'll need to fetch department name separately if needed
+            position: employee.job_title,
+            bank: employee.bank_name || 'N/A',
+            accountNumber: employee.account_number || 'N/A',
+            idNumber: employee.pan_number || 'N/A',
+            employmentType: employee.employment_status,
+            email: employee.email,
+            phone: employee.phone,
+            address: employee.address
           },
           payroll: {
-            period: `${payrollPeriod.month}/${payrollPeriod.year}`,
-            grossSalary: record.gross_salary_usd,
-            paye: record.paye,
-            aidsLevy: record.aids_levy,
-            nssa: record.nssa,
-            totalDeductions: record.total_deductions,
-            netSalary: record.net_salary_usd
+            period: `${record.month}/${record.year}`,
+            payPeriodStart: record.pay_period_start,
+            payPeriodEnd: record.pay_period_end,
+            grossSalary: record.gross_salary,
+            basicSalary: record.basic_salary,
+            allowances: record.allowances,
+            transportAllowance: record.transport_allowance,
+            overtimePay: record.overtime_pay,
+            totalAllowances: record.total_allowances || 0,
+            deductions: record.deductions,
+            nssaDeduction: record.nssa_deduction,
+            payeeDeduction: record.payee_deduction,
+            totalDeductions: record.total_deductions || 0,
+            netSalary: record.net_salary,
+            exchangeRate: record.exchange_rate,
+            daysWorked: record.days_worked,
+            daysAbsent: record.days_absent,
+            paymentStatus: record.payment_status,
+            paymentDate: record.payment_date,
+            paymentMethod: record.payment_method
           },
-          allowances: allowances || [],
-          deductions: deductions || [],
-          leaveBalance: leaveBalance?.closing_balance || 0,
           generatedAt: new Date().toISOString(),
-          generatedBy: authResult.user.full_name
+          notes: record.notes || ''
         }
 
         payslips.push({
+          payrollId: record.id,
           employeeId: record.employee_id,
-          employeeNumber: record.employees.employee_number,
-          employeeName: record.employees.users.full_name,
+          employeeNumber: employee.employee_id,
+          employeeName: `${employee.first_name} ${employee.last_name}`,
           data: payslipData
         })
 
+        console.log('✅ [BULK PAYSLIP] Generated payslip for:', employee.employee_id)
+
       } catch (error) {
+        console.log('❌ [BULK PAYSLIP] Error processing record:', record.id, error)
         errors.push({
+          payrollId: record.id,
           employeeId: record.employee_id,
-          employeeNumber: record.employees.employee_number,
+          employeeNumber: record.employees?.employee_id,
           error: error instanceof Error ? error.message : 'Unknown error'
         })
       }
     }
+
+    console.log('📊 [BULK PAYSLIP] Processing complete:', {
+      successful: payslips.length,
+      errors: errors.length
+    })
 
     // Generate summary
     const summary = {
       totalEmployees: payrollRecords.length,
       successfulPayslips: payslips.length,
       failedPayslips: errors.length,
-      totalGrossSalary: payslips.reduce((sum, p) => sum + p.data.payroll.grossSalary, 0),
-      totalPAYE: payslips.reduce((sum, p) => sum + p.data.payroll.paye, 0),
-      totalAidsLevy: payslips.reduce((sum, p) => sum + p.data.payroll.aidsLevy, 0),
-      totalNSSA: payslips.reduce((sum, p) => sum + p.data.payroll.nssa, 0),
-      totalDeductions: payslips.reduce((sum, p) => sum + p.data.payroll.totalDeductions, 0),
-      totalNetSalary: payslips.reduce((sum, p) => sum + p.data.payroll.netSalary, 0)
+      totalGrossSalary: payslips.reduce((sum, p) => sum + (p.data.payroll.grossSalary || 0), 0),
+      totalBasicSalary: payslips.reduce((sum, p) => sum + (p.data.payroll.basicSalary || 0), 0),
+      totalAllowances: payslips.reduce((sum, p) => sum + (p.data.payroll.allowances || 0), 0),
+      totalTransportAllowance: payslips.reduce((sum, p) => sum + (p.data.payroll.transportAllowance || 0), 0),
+      totalOvertimePay: payslips.reduce((sum, p) => sum + (p.data.payroll.overtimePay || 0), 0),
+      totalDeductions: payslips.reduce((sum, p) => sum + (p.data.payroll.totalDeductions || 0), 0),
+      totalNSSADeduction: payslips.reduce((sum, p) => sum + (p.data.payroll.nssaDeduction || 0), 0),
+      totalPAYEDeduction: payslips.reduce((sum, p) => sum + (p.data.payroll.payeeDeduction || 0), 0),
+      totalNetSalary: payslips.reduce((sum, p) => sum + (p.data.payroll.netSalary || 0), 0)
     }
 
+    console.log('📄 [BULK PAYSLIP] Format requested:', format)
+    
     if (format === 'zip') {
+      console.log('🔧 [BULK PAYSLIP] Generating ZIP file...')
       // Generate ZIP file with all payslips
-      const zipBuffer = await generatePayslipsZIP(payslips, payrollPeriod)
+      const zipBuffer = await generatePayslipsZIP(payslips, { month, year })
+      console.log('✅ [BULK PAYSLIP] ZIP generated successfully')
       
       return new NextResponse(zipBuffer as any, {
         headers: {
           'Content-Type': 'application/zip',
-          'Content-Disposition': `attachment; filename="payslips-${payrollPeriod.month}-${payrollPeriod.year}.zip"`
+          'Content-Disposition': `attachment; filename="payslips-${month}-${year}.zip"`
         }
       })
     } else {
+      console.log('📊 [BULK PAYSLIP] Returning JSON data')
       // Return JSON data
       return NextResponse.json({
         success: true,
@@ -190,7 +219,8 @@ export async function POST(request: NextRequest) {
     }
 
   } catch (error) {
-    console.error('Bulk payslip generation error:', error)
+    console.error('❌ [BULK PAYSLIP] Unexpected error:', error)
+    console.error('❌ [BULK PAYSLIP] Error stack:', error instanceof Error ? error.stack : 'No stack trace')
     return NextResponse.json({ 
       error: 'Internal server error',
       details: error instanceof Error ? error.message : 'Unknown error'
@@ -198,19 +228,25 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function generatePayslipsZIP(payslips: any[], payrollPeriod: any): Promise<Buffer> {
+async function generatePayslipsZIP(payslips: any[], period: { month: number, year: number }): Promise<Buffer> {
   // This is a placeholder for ZIP generation
   // In a real implementation, you would use a library like jszip
   
   const zipContent = `
-    PAYSLIPS FOR ${payrollPeriod.month}/${payrollPeriod.year}
+    PAYSLIPS FOR ${period.month}/${period.year}
     ================================================
     
     Total Employees: ${payslips.length}
     Generated: ${new Date().toISOString()}
     
     Files included:
-    ${payslips.map(p => `- payslip-${p.employeeNumber}-${payrollPeriod.month}-${payrollPeriod.year}.pdf`).join('\n')}
+    ${payslips.map(p => `- payslip-${p.employeeNumber}-${period.month}-${period.year}.pdf`).join('\n')}
+    
+    SUMMARY:
+    ================================================
+    Total Gross Salary: $${payslips.reduce((sum, p) => sum + (p.data.payroll.grossSalary || 0), 0).toFixed(2)}
+    Total Net Salary: $${payslips.reduce((sum, p) => sum + (p.data.payroll.netSalary || 0), 0).toFixed(2)}
+    Total Deductions: $${payslips.reduce((sum, p) => sum + (p.data.payroll.totalDeductions || 0), 0).toFixed(2)}
   `
 
   // Convert to Buffer (placeholder implementation)

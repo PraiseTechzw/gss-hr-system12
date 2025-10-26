@@ -4,12 +4,29 @@ import { createClient } from "@/lib/supabase/server"
 export async function AttendanceChart() {
   const supabase = await createClient()
   
-  // For now, return mock data since we don't have attendance tables yet
-  // This can be connected to real attendance data when the tables are created
+  // Fetch real attendance data for the last 30 days
+  const { data: attendanceData, error } = await supabase
+    .from('attendance')
+    .select('*')
+    .gte('date', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0])
+    .order('date', { ascending: false })
+
+  if (error) {
+    console.error('Error fetching attendance data:', error)
+  }
+
+  const attendance = attendanceData || []
+  const presentDays = attendance.filter(att => att.status === 'present').length
+  const absentDays = attendance.filter(att => att.status === 'absent').length
+  const lateDays = attendance.filter(att => att.status === 'late').length
+  const totalDays = attendance.length
+  const attendanceRate = totalDays > 0 ? Math.round((presentDays / totalDays) * 100) : 0
+
   const attendanceStats = {
-    presentDays: 27,
-    absentDays: 3,
-    attendanceRate: 90
+    presentDays,
+    absentDays,
+    lateDays,
+    attendanceRate
   }
 
   return (
@@ -43,12 +60,45 @@ export async function AttendanceChart() {
 export async function PayrollChart() {
   const supabase = await createClient()
   
-  // For now, return mock data since we don't have payroll tables yet
-  // This can be connected to real payroll data when the tables are created
+  // Fetch real payroll data for the current month
+  const currentMonth = new Date().getMonth()
+  const currentYear = new Date().getFullYear()
+  
+  const { data: currentPayrollData, error: currentError } = await supabase
+    .from('payroll')
+    .select('*')
+    .gte('pay_period_start', new Date(currentYear, currentMonth, 1).toISOString().split('T')[0])
+    .lt('pay_period_start', new Date(currentYear, currentMonth + 1, 1).toISOString().split('T')[0])
+
+  // Fetch previous month data for comparison
+  const previousMonth = currentMonth === 0 ? 11 : currentMonth - 1
+  const previousYear = currentMonth === 0 ? currentYear - 1 : currentYear
+  
+  const { data: previousPayrollData, error: previousError } = await supabase
+    .from('payroll')
+    .select('*')
+    .gte('pay_period_start', new Date(previousYear, previousMonth, 1).toISOString().split('T')[0])
+    .lt('pay_period_start', new Date(previousYear, previousMonth + 1, 1).toISOString().split('T')[0])
+
+  if (currentError || previousError) {
+    console.error('Error fetching payroll data:', currentError || previousError)
+  }
+
+  const currentPayroll = currentPayrollData || []
+  const previousPayroll = previousPayrollData || []
+  
+  const totalCurrentPayroll = currentPayroll.reduce((sum, record) => sum + (record.net_salary || 0), 0)
+  const totalPreviousPayroll = previousPayroll.reduce((sum, record) => sum + (record.net_salary || 0), 0)
+  
+  const monthlyGrowth = totalPreviousPayroll > 0 ? 
+    ((totalCurrentPayroll - totalPreviousPayroll) / totalPreviousPayroll * 100).toFixed(1) : '0'
+
+  const averageSalary = currentPayroll.length > 0 ? totalCurrentPayroll / currentPayroll.length : 0
+
   const payrollStats = {
-    totalPayroll: 45230,
-    averageSalary: 2500,
-    monthlyGrowth: 5.2
+    totalPayroll: totalCurrentPayroll,
+    averageSalary: averageSalary,
+    monthlyGrowth: parseFloat(monthlyGrowth)
   }
 
   return (

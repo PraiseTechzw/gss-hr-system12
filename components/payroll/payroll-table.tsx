@@ -11,7 +11,7 @@ import { Eye, Download, Search, Trash2, Filter, ChevronUp, ChevronDown, MoreHori
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-// Supabase client removed
+import { createClient } from "@/lib/supabase/client"
 import { toast } from "sonner"
 import { exportPayrollToCSV, generatePayslipPDF } from "@/lib/export-utils"
 

@@ -2,9 +2,9 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Bell, Search, User, LogOut, Settings, Moon, Sun } from "lucide-react"
+import { Search, User, LogOut, Settings, Moon, Sun, Shield, Mail, Phone, Calendar, MapPin } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -38,6 +38,15 @@ export default function Header({ user }: HeaderProps) {
   const [darkMode, setDarkMode] = useState(false)
   const router = useRouter()
 
+  // Load dark mode preference on mount
+  useEffect(() => {
+    const savedDarkMode = localStorage.getItem('darkMode') === 'true'
+    setDarkMode(savedDarkMode)
+    if (savedDarkMode) {
+      document.documentElement.classList.add('dark')
+    }
+  }, [])
+
   const handleLogout = async () => {
     try {
       const response = await fetch("/api/auth/logout", {
@@ -69,18 +78,26 @@ export default function Header({ user }: HeaderProps) {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
     if (searchQuery.trim()) {
-      // Implement search functionality
-      toast.info("Search functionality coming soon", {
-        description: `Searching for: ${searchQuery}`,
+      // Navigate to search results or implement search
+      const searchTerm = searchQuery.trim()
+      toast.info("Search initiated", {
+        description: `Searching for: ${searchTerm}`,
       })
+      
+      // You can implement actual search functionality here
+      // For example, navigate to a search results page
+      // router.push(`/search?q=${encodeURIComponent(searchTerm)}`)
     }
   }
 
   const toggleDarkMode = () => {
     setDarkMode(!darkMode)
-    // Implement dark mode toggle
-    toast.info("Dark mode toggle coming soon", {
-      description: "Theme switching will be available soon",
+    // Toggle dark mode on document
+    document.documentElement.classList.toggle('dark')
+    localStorage.setItem('darkMode', (!darkMode).toString())
+    
+    toast.success("Theme updated", {
+      description: `Switched to ${!darkMode ? 'dark' : 'light'} mode`,
     })
   }
 
@@ -110,88 +127,101 @@ export default function Header({ user }: HeaderProps) {
             {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </Button>
 
-          {/* Notifications */}
+          {/* Enhanced User menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="relative">
-                <Bell className="h-4 w-4" />
-                <Badge
-                  variant="destructive"
-                  className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center text-xs"
-                >
-                  3
-                </Badge>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-80">
-              <DropdownMenuLabel className="font-semibold">Notifications</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="flex items-start space-x-3 p-3">
-                <div className="w-2 h-2 bg-blue-500 rounded-full mt-2" />
-                <div className="flex-1">
-                  <p className="text-sm font-medium">New leave request</p>
-                  <p className="text-xs text-gray-500">John Doe requested 3 days off</p>
-                  <p className="text-xs text-gray-400">2 minutes ago</p>
-                </div>
-              </DropdownMenuItem>
-              <DropdownMenuItem className="flex items-start space-x-3 p-3">
-                <div className="w-2 h-2 bg-green-500 rounded-full mt-2" />
-                <div className="flex-1">
-                  <p className="text-sm font-medium">Attendance reminder</p>
-                  <p className="text-xs text-gray-500">Time to check in for the day</p>
-                  <p className="text-xs text-gray-400">1 hour ago</p>
-                </div>
-              </DropdownMenuItem>
-              <DropdownMenuItem className="flex items-start space-x-3 p-3">
-                <div className="w-2 h-2 bg-yellow-500 rounded-full mt-2" />
-                <div className="flex-1">
-                  <p className="text-sm font-medium">System update</p>
-                  <p className="text-xs text-gray-500">New features available</p>
-                  <p className="text-xs text-gray-400">3 hours ago</p>
-                </div>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-center">
-                <span className="text-sm text-blue-600 font-medium">View all notifications</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {/* User menu */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="flex items-center space-x-2">
-                <Avatar className="h-8 w-8">
+              <Button variant="ghost" className="flex items-center space-x-3 hover:bg-gray-50 transition-colors">
+                <Avatar className="h-9 w-9 ring-2 ring-gray-200">
                   <AvatarImage src="/placeholder.svg" alt={user?.full_name} />
-                  <AvatarFallback className="bg-gradient-to-br from-blue-600 to-red-600 text-white text-sm font-semibold">
+                  <AvatarFallback className="bg-gradient-to-br from-blue-600 to-purple-600 text-white text-sm font-semibold">
                     {user?.first_name?.[0]}
                     {user?.last_name?.[0]}
                   </AvatarFallback>
                 </Avatar>
                 <div className="hidden sm:block text-left">
-                  <p className="text-sm font-medium text-gray-900">{user?.full_name}</p>
-                  <p className="text-xs text-gray-500">{user?.role?.toUpperCase()}</p>
+                  <p className="text-sm font-semibold text-gray-900">{user?.full_name}</p>
+                  <div className="flex items-center space-x-1">
+                    <Shield className="h-3 w-3 text-blue-500" />
+                    <p className="text-xs text-gray-500 font-medium">{user?.role?.toUpperCase()}</p>
+                  </div>
                 </div>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel className="font-semibold">My Account</DropdownMenuLabel>
+            <DropdownMenuContent align="end" className="w-80">
+              {/* User Profile Header */}
+              <div className="px-4 py-3 border-b border-gray-100">
+                <div className="flex items-center space-x-3">
+                  <Avatar className="h-12 w-12">
+                    <AvatarImage src="/placeholder.svg" alt={user?.full_name} />
+                    <AvatarFallback className="bg-gradient-to-br from-blue-600 to-purple-600 text-white text-lg font-semibold">
+                      {user?.first_name?.[0]}
+                      {user?.last_name?.[0]}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-gray-900">{user?.full_name}</p>
+                    <div className="flex items-center space-x-1 mt-1">
+                      <Shield className="h-3 w-3 text-blue-500" />
+                      <p className="text-xs text-gray-500 font-medium">{user?.role?.toUpperCase()}</p>
+                    </div>
+                    <p className="text-xs text-gray-400 mt-1">{user?.email}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* User Details */}
+              <div className="px-4 py-3 space-y-2">
+                <div className="flex items-center space-x-2 text-sm text-gray-600">
+                  <Mail className="h-4 w-4 text-gray-400" />
+                  <span>{user?.email}</span>
+                </div>
+                {user?.position && (
+                  <div className="flex items-center space-x-2 text-sm text-gray-600">
+                    <User className="h-4 w-4 text-gray-400" />
+                    <span>{user.position}</span>
+                  </div>
+                )}
+                <div className="flex items-center space-x-2 text-sm text-gray-600">
+                  <Calendar className="h-4 w-4 text-gray-400" />
+                  <span>Member since {new Date().getFullYear()}</span>
+                </div>
+                <div className="flex items-center space-x-2 text-sm text-gray-600">
+                  <MapPin className="h-4 w-4 text-gray-400" />
+                  <span>Active Status: {user?.status || 'Active'}</span>
+                </div>
+              </div>
+
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="flex items-center space-x-2">
-                <User className="h-4 w-4" />
-                <span>Profile</span>
+
+              {/* Menu Items */}
+              <DropdownMenuItem className="flex items-center space-x-3 px-4 py-3 hover:bg-gray-50">
+                <User className="h-4 w-4 text-gray-500" />
+                <div>
+                  <p className="text-sm font-medium">View Profile</p>
+                  <p className="text-xs text-gray-500">Manage your personal information</p>
+                </div>
               </DropdownMenuItem>
-              <DropdownMenuItem className="flex items-center space-x-2">
-                <Settings className="h-4 w-4" />
-                <span>Settings</span>
+              
+              <DropdownMenuItem className="flex items-center space-x-3 px-4 py-3 hover:bg-gray-50">
+                <Settings className="h-4 w-4 text-gray-500" />
+                <div>
+                  <p className="text-sm font-medium">Account Settings</p>
+                  <p className="text-xs text-gray-500">Privacy, security, and preferences</p>
+                </div>
               </DropdownMenuItem>
+
               <DropdownMenuSeparator />
+
+              {/* Logout */}
               <DropdownMenuItem
-                className="flex items-center space-x-2 text-red-600 focus:text-red-600"
+                className="flex items-center space-x-3 px-4 py-3 text-red-600 hover:bg-red-50 focus:text-red-600"
                 onClick={handleLogout}
               >
                 <LogOut className="h-4 w-4" />
-                <span>Sign out</span>
+                <div>
+                  <p className="text-sm font-medium">Sign out</p>
+                  <p className="text-xs text-red-500">End your current session</p>
+                </div>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

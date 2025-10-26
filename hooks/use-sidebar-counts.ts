@@ -1,13 +1,15 @@
 "use client"
 
 import { useState, useEffect } from "react"
-// Supabase client removed
+import { createClient } from "@/lib/supabase/client"
 
 export function useSidebarCounts() {
   const [counts, setCounts] = useState({
     employees: 0,
     deployments: 0,
     pendingLeaves: 0,
+    payrollRecords: 0,
+    users: 0,
     loading: true
   })
 
@@ -19,17 +21,23 @@ export function useSidebarCounts() {
         const [
           { count: employeeCount },
           { count: deploymentCount },
-          { count: leaveCount }
+          { count: leaveCount },
+          { count: payrollCount },
+          { count: userCount }
         ] = await Promise.all([
           supabase.from("employees").select("*", { count: "exact", head: true }).eq("status", "active"),
           supabase.from("deployments").select("*", { count: "exact", head: true }).eq("status", "active"),
-          supabase.from("leave_requests").select("*", { count: "exact", head: true }).eq("status", "pending")
+          supabase.from("leave_requests").select("*", { count: "exact", head: true }).eq("status", "pending"),
+          supabase.from("payroll").select("*", { count: "exact", head: true }).eq("payment_status", "pending"),
+          supabase.from("user_profiles").select("*", { count: "exact", head: true }).eq("status", "active")
         ])
 
         setCounts({
           employees: employeeCount || 0,
           deployments: deploymentCount || 0,
           pendingLeaves: leaveCount || 0,
+          payrollRecords: payrollCount || 0,
+          users: userCount || 0,
           loading: false
         })
       } catch (error) {

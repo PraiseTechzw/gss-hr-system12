@@ -16,7 +16,7 @@ import {
   Filter
 } from "lucide-react"
 import Link from "next/link"
-// Supabase client removed
+import { createClient } from "@/lib/supabase/client"
 import { exportPayrollToCSV, exportEmployeesToCSV } from "@/lib/export-utils"
 
 type ReportItem = {

@@ -5,6 +5,9 @@ import { Badge } from "@/components/ui/badge"
 import { Plus, DollarSign, Users, Calendar, TrendingUp, Clock, CheckCircle, AlertCircle } from "lucide-react"
 import Link from "next/link"
 import { PayrollTable } from "@/components/payroll/payroll-table"
+import { PayrollStats } from "@/components/payroll/payroll-stats"
+import { PayslipGenerator } from "@/components/payroll/payslip-generator"
+import { BulkPayslipGenerator } from "@/components/payroll/bulk-payslip-generator"
 
 export default async function PayrollPage() {
   const supabase = await createClient()
@@ -47,6 +50,16 @@ export default async function PayrollPage() {
     .from("payroll")
     .select("*", { count: "exact", head: true })
     .eq("payment_status", "paid")
+
+  // Fetch employees for payslip generation
+  const { data: employees } = await supabase
+    .from("employees")
+    .select("id, employee_id, first_name, last_name, job_title, email")
+
+  // Fetch departments for bulk generation
+  const { data: departments } = await supabase
+    .from("departments")
+    .select("id, name")
 
   // Get current month statistics
   const currentDate = new Date()
@@ -248,6 +261,18 @@ export default async function PayrollPage() {
           <Calendar className="mr-1 h-3 w-3" />
           Total: {totalRecords}
         </Badge>
+      </div>
+
+      {/* Payroll Statistics */}
+      <PayrollStats />
+
+      {/* Payslip Generation */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        <PayslipGenerator 
+          payrollRecords={payrollRecords || []} 
+          employees={employees || []} 
+        />
+        <BulkPayslipGenerator departments={departments || []} />
       </div>
 
       {/* Payroll Records Table */}

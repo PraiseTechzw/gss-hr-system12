@@ -7,7 +7,9 @@ import {
   Clock, 
   CheckCircle, 
   AlertCircle,
-  Activity
+  Activity,
+  Users,
+  DollarSign
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { createClient } from "@/lib/supabase/server"
@@ -46,51 +48,75 @@ const getStatusIcon = (status: string) => {
 export async function SystemStatus() {
   const supabase = await createClient()
   
-  // Get real system data from Supabase
-  const [usersResult, departmentsResult] = await Promise.all([
+  // Get comprehensive system data from Supabase
+  const [usersResult, departmentsResult, employeesResult, attendanceResult, payrollResult] = await Promise.all([
     supabase.from('user_profiles').select('*', { count: 'exact' }),
-    supabase.from('departments').select('*', { count: 'exact' })
+    supabase.from('departments').select('*', { count: 'exact' }),
+    supabase.from('employees').select('*', { count: 'exact' }),
+    supabase.from('attendance').select('*', { count: 'exact' }),
+    supabase.from('payroll').select('*', { count: 'exact' })
   ])
   
   const totalUsers = usersResult.count || 0
   const totalDepartments = departmentsResult.count || 0
+  const totalEmployees = employeesResult.count || 0
+  const totalAttendance = attendanceResult.count || 0
+  const totalPayroll = payrollResult.count || 0
   const activeUsers = usersResult.data?.filter(user => user.status === 'active').length || 0
+  const activeEmployees = employeesResult.data?.filter(emp => emp.status === 'active').length || 0
+
+  // Check for recent activity (last 24 hours)
+  const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000)
+  const { data: recentActivity } = await supabase
+    .from('system_activity')
+    .select('*')
+    .gte('created_at', yesterday.toISOString())
+    .limit(1)
+
+  const hasRecentActivity = recentActivity && recentActivity.length > 0
 
   const items = [
     {
       name: "Database",
       status: "connected",
       icon: Database,
-      description: `${totalUsers} users, ${totalDepartments} departments`,
+      description: `${totalUsers} users, ${totalDepartments} departments, ${totalEmployees} employees`,
       lastChecked: "Just now",
     },
     {
       name: "Authentication",
       status: activeUsers > 0 ? "active" : "warning",
       icon: Shield,
-      description: activeUsers > 0 ? "Sessions healthy" : "No active users detected",
+      description: activeUsers > 0 ? `${activeUsers} active sessions` : "No active users detected",
       lastChecked: "Just now",
     },
     {
-      name: "Cloud Storage",
-      status: "connected",
-      icon: Cloud,
-      description: "Supabase connected",
-      lastChecked: "Today",
+      name: "Employee Data",
+      status: totalEmployees > 0 ? "active" : "warning",
+      icon: Users,
+      description: `${activeEmployees}/${totalEmployees} active employees`,
+      lastChecked: "Just now",
     },
     {
-      name: "Last Backup",
-      status: "completed",
+      name: "Attendance System",
+      status: totalAttendance > 0 ? "active" : "warning",
       icon: Clock,
-      description: new Date().toLocaleString(),
-      lastChecked: "—",
+      description: totalAttendance > 0 ? `${totalAttendance} attendance records` : "No attendance data",
+      lastChecked: "Just now",
     },
     {
-      name: "System Version",
-      status: "normal",
+      name: "Payroll System",
+      status: totalPayroll > 0 ? "active" : "warning",
+      icon: DollarSign,
+      description: totalPayroll > 0 ? `${totalPayroll} payroll records` : "No payroll data",
+      lastChecked: "Just now",
+    },
+    {
+      name: "System Activity",
+      status: hasRecentActivity ? "active" : "warning",
       icon: Activity,
-      description: "v1.0.0",
-      lastChecked: "UTC",
+      description: hasRecentActivity ? "Recent activity detected" : "No recent activity",
+      lastChecked: "Just now",
     },
   ]
 

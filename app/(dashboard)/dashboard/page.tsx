@@ -2,44 +2,40 @@ import { QuickActions } from "@/components/dashboard/quick-actions"
 import { SystemStatus } from "@/components/dashboard/system-status"
 import { RecentActivity } from "@/components/dashboard/recent-activity"
 import { AttendanceChart, PayrollChart } from "@/components/dashboard/attendance-chart"
-import { createClient } from "@/lib/supabase/server"
+import { getDashboardData } from "@/lib/dashboard-data"
+
+interface StatCard {
+  title: string
+  value: string | number
+  iconName: string
+  color: string
+  bgColor: string
+  trend: { value: string | number; label: string }
+  description: string
+}
 
 export default async function DashboardPage() {
-  const supabase = await createClient()
-  
-  // Fetch real data from Supabase
-  const [usersResult, departmentsResult, activityResult] = await Promise.all([
-    supabase.from('user_profiles').select('*', { count: 'exact' }),
-    supabase.from('departments').select('*', { count: 'exact' }),
-    supabase.from('system_activity').select('*').order('created_at', { ascending: false }).limit(10)
-  ])
-  
-  const totalUsers = usersResult.count || 0
-  const totalDepartments = departmentsResult.count || 0
-  const recentActivity = activityResult.data || []
-  
-  // Calculate stats from real data
-  const activeUsers = usersResult.data?.filter(user => user.status === 'active').length || 0
-  const totalEmployees = usersResult.data?.filter(user => user.role === 'employee').length || 0
+  // Fetch comprehensive dashboard data using the utility
+  const { stats: dashboardData, recentActivity } = await getDashboardData()
   
   const dashboardStats = {
-    totalEmployees: totalEmployees,
-    activeEmployees: activeUsers,
-    activeDeployments: totalDepartments,
-    totalDeployments: totalDepartments
+    totalEmployees: dashboardData.employees.total,
+    activeEmployees: dashboardData.employees.active,
+    activeDeployments: dashboardData.deployments.active,
+    totalDeployments: dashboardData.deployments.total
   }
   
   const payrollStats = {
-    totalPayroll: 45230, // This would need a payroll table
-    monthlyGrowth: 5.2
+    totalPayroll: dashboardData.payroll.totalPayroll,
+    monthlyGrowth: parseFloat(dashboardData.payroll.monthlyGrowth.replace('%', ''))
   }
   
   const attendanceStats = {
-    attendanceRate: 91, // This would need an attendance table
-    presentDays: 27
+    attendanceRate: dashboardData.attendance.attendanceRate,
+    presentDays: dashboardData.attendance.presentDays
   }
 
-  const stats = [
+  const statsCards: StatCard[] = [
     {
       title: "Total Employees",
       value: dashboardStats.totalEmployees,
@@ -154,7 +150,7 @@ export default async function DashboardPage() {
 
         {/* Enhanced Statistics Cards with advanced animations */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-          {stats.map((stat, index) => (
+          {statsCards.map((stat: StatCard, index: number) => (
             <div
               key={stat.title}
               className="group relative overflow-hidden rounded-3xl bg-white/80 backdrop-blur-sm p-6 shadow-xl border border-white/20 transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 hover:scale-105"

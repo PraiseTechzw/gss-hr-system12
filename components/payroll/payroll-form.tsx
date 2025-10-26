@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-// Supabase client removed
+import { createClient } from "@/lib/supabase/client"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -54,6 +54,9 @@ export function PayrollForm({ employees }: { employees: Employee[] }) {
     payment_date: "",
     payment_method: "",
     notes: "",
+    // Add missing required fields
+    pay_period_start: "",
+    pay_period_end: "",
   })
 
   const [calculatedValues, setCalculatedValues] = useState({
@@ -62,6 +65,20 @@ export function PayrollForm({ employees }: { employees: Employee[] }) {
     total_allowances: 0,
     total_deductions: 0,
   })
+
+  // Calculate pay period dates based on month and year
+  useEffect(() => {
+    if (formData.month && formData.year) {
+      const startDate = new Date(formData.year, formData.month - 1, 1)
+      const endDate = new Date(formData.year, formData.month, 0) // Last day of the month
+      
+      setFormData(prev => ({
+        ...prev,
+        pay_period_start: startDate.toISOString().split('T')[0],
+        pay_period_end: endDate.toISOString().split('T')[0]
+      }))
+    }
+  }, [formData.month, formData.year])
 
   // Enhanced calculation logic
   useEffect(() => {
@@ -204,6 +221,9 @@ export function PayrollForm({ employees }: { employees: Employee[] }) {
         payment_date: formData.payment_date || null,
         payment_method: formData.payment_method || null,
         notes: formData.notes || null,
+        // Pay period dates (required fields)
+        pay_period_start: formData.pay_period_start,
+        pay_period_end: formData.pay_period_end,
         // explicit components & fx
         exchange_rate: Number.parseFloat(formData.exchange_rate) || 0,
         transport_allowance: Number.parseFloat(formData.transport_allowance) || 0,
@@ -344,6 +364,17 @@ export function PayrollForm({ employees }: { employees: Employee[] }) {
             />
           </div>
         </div>
+        
+        {/* Pay Period Display */}
+        {formData.pay_period_start && formData.pay_period_end && (
+          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-center gap-2 text-sm text-blue-700">
+              <Calendar className="h-4 w-4" />
+              <span className="font-medium">Pay Period:</span>
+              <span>{formData.pay_period_start} to {formData.pay_period_end}</span>
+            </div>
+          </div>
+        )}
           </CardContent>
         </Card>
 

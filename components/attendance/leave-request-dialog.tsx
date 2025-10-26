@@ -10,7 +10,8 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { useRouter } from "next/navigation"
-// Supabase client removed
+import { createClient } from "@/lib/supabase/client"
+import { LeaveManagementService } from "@/lib/leave-management"
 
 type Employee = {
   id: string
@@ -44,11 +45,7 @@ export function LeaveRequestDialog({
 
   const calculateDays = () => {
     if (formData.start_date && formData.end_date) {
-      const start = new Date(formData.start_date)
-      const end = new Date(formData.end_date)
-      const diffTime = Math.abs(end.getTime() - start.getTime())
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1
-      return diffDays
+      return LeaveManagementService.calculateLeaveDays(formData.start_date, formData.end_date)
     }
     return 0
   }
@@ -59,6 +56,13 @@ export function LeaveRequestDialog({
     setError(null)
 
     try {
+      // Validate the leave request
+      const validation = LeaveManagementService.validateLeaveRequest(formData)
+      if (!validation.valid) {
+        setError(validation.errors.join(', '))
+        return
+      }
+
       const totalDays = calculateDays()
 
       const { error } = await supabase.from("leave_requests").insert([

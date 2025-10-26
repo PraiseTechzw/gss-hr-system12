@@ -10,7 +10,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { Eye, Pencil, Trash2, Search, Filter, Download, MoreHorizontal, ArrowUpDown, ChevronLeft, ChevronRight, MapPin, Calendar, Users, Grid, List } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-// Supabase client removed
+import { createClient } from "@/lib/supabase/client"
 
 type Deployment = {
   id: string

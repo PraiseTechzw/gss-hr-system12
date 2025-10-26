@@ -15,6 +15,7 @@ import {
   Clock,
   Star,
   UserPlus,
+  LogOut,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
@@ -23,13 +24,15 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { useState, useEffect, useMemo } from "react"
-import { useSidebarCounts } from "@/hooks/use-sidebar-counts"
+import { useSidebarData } from "@/hooks/use-sidebar-data"
+import { getRolePermissions, hasPermission } from "@/lib/role-based-access"
 
 const quickActions = [
-  { name: "Add Employee", href: "/employees/new", icon: Users },
-  { name: "New Deployment", href: "/deployments/new", icon: MapPin },
-  { name: "Process Payroll", href: "/payroll/new", icon: DollarSign },
-  { name: "View Reports", href: "/reports", icon: FileText },
+  { name: "Add Employee", href: "/employees/new", icon: Users, roles: ["admin", "manager", "hr"] },
+  { name: "New Deployment", href: "/deployments/new", icon: MapPin, roles: ["admin", "manager", "hr"] },
+  { name: "Process Payroll", href: "/payroll/new", icon: DollarSign, roles: ["admin", "manager"] },
+  { name: "View Reports", href: "/reports", icon: FileText, roles: ["admin", "manager", "hr"] },
+  { name: "Create User", href: "/admin/create-user", icon: UserPlus, roles: ["admin"] },
 ]
 
 export function AppSidebar() {
@@ -42,8 +45,8 @@ export function AppSidebar() {
   const [recentPages, setRecentPages] = useState<string[]>([])
   const [favoritePages, setFavoritePages] = useState<string[]>([])
 
-  // Get real-time counts for badges
-  const sidebarCounts = useSidebarCounts()
+  // Get real-time data for badges and counts
+  const sidebarData = useSidebarData()
 
   const baseNavigation = [
     {
@@ -60,7 +63,7 @@ export function AppSidebar() {
       icon: Users,
       description: "Manage workforce",
       category: "management",
-      badge: sidebarCounts.loading ? "..." : sidebarCounts.employees.toString(),
+      badge: sidebarData.loading ? "..." : sidebarData.employees.toString(),
       roles: ["admin", "manager", "hr"],
     },
     {
@@ -69,7 +72,7 @@ export function AppSidebar() {
       icon: MapPin,
       description: "Site assignments",
       category: "management",
-      badge: sidebarCounts.loading ? "..." : sidebarCounts.deployments.toString(),
+      badge: sidebarData.loading ? "..." : sidebarData.deployments.toString(),
       roles: ["admin", "manager", "hr"],
     },
     {
@@ -78,7 +81,7 @@ export function AppSidebar() {
       icon: Calendar,
       description: "Time tracking",
       category: "operations",
-      badge: sidebarCounts.loading ? "..." : sidebarCounts.pendingLeaves.toString(),
+      badge: sidebarData.loading ? "..." : sidebarData.pendingLeaves.toString(),
       roles: ["admin", "manager", "hr"],
     },
     {
@@ -87,6 +90,7 @@ export function AppSidebar() {
       icon: DollarSign,
       description: "Salary management",
       category: "finance",
+      badge: sidebarData.loading ? "..." : sidebarData.payrollRecords.toString(),
       roles: ["admin", "manager"],
     },
     {
@@ -110,7 +114,7 @@ export function AppSidebar() {
   const adminNavigation = [
     {
       name: "Admin Dashboard",
-      href: "/admin/dashboard",
+      href: "/admin",
       icon: Shield,
       description: "Admin overview",
       category: "admin",
@@ -123,6 +127,7 @@ export function AppSidebar() {
       icon: Users,
       description: "Manage user accounts and roles",
       category: "admin",
+      badge: sidebarData.loading ? "..." : sidebarData.users.toString(),
       roles: ["admin"],
       isAdmin: true,
     },
@@ -171,8 +176,44 @@ export function AppSidebar() {
     baseNavigation: baseNavigation.length,
   })
 
-  const baseFilteredNavigation = baseNavigation.filter((item) => item.roles.includes(userRole))
-  const adminFilteredNavigation = adminNavigation.filter((item) => isAdmin && item.roles.includes("admin"))
+  // Get user permissions
+  const permissions = getRolePermissions(userRole)
+  
+  const baseFilteredNavigation = baseNavigation.filter((item) => {
+    // Check role-based permissions
+    switch (item.name) {
+      case "Employees":
+        return permissions.canManageEmployees
+      case "Deployments":
+        return permissions.canManageDeployments
+      case "Leave & Attendance":
+        return permissions.canManageAttendance
+      case "Payroll":
+        return permissions.canManagePayroll
+      case "Reports":
+        return permissions.canViewReports
+      case "Settings":
+        return permissions.canManageSettings
+      default:
+        return true
+    }
+  })
+  
+  const adminFilteredNavigation = adminNavigation.filter((item) => {
+    switch (item.name) {
+      case "User Management":
+        return permissions.canManageUsers
+      case "Create User":
+        return permissions.canCreateUsers
+      case "Admin Dashboard":
+      case "Admin Settings":
+      case "Admin Reports":
+        return permissions.canViewAdminPanel
+      default:
+        return false
+    }
+  })
+  
   const navigation = [...baseFilteredNavigation, ...adminFilteredNavigation]
 
   console.log("Filtered Navigation:", {
@@ -331,7 +372,22 @@ export function AppSidebar() {
             <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Quick Actions</h3>
           )}
           <div className="space-y-1">
-            {quickActions.map((action) => (
+            {quickActions.filter(action => {
+              switch (action.name) {
+                case "Add Employee":
+                  return permissions.canManageEmployees
+                case "New Deployment":
+                  return permissions.canManageDeployments
+                case "Process Payroll":
+                  return permissions.canManagePayroll
+                case "View Reports":
+                  return permissions.canViewReports
+                case "Create User":
+                  return permissions.canCreateUsers
+                default:
+                  return true
+              }
+            }).map((action) => (
               <Link
                 key={action.name}
                 href={action.href}
@@ -595,8 +651,50 @@ export function AppSidebar() {
         )}
       </nav>
 
-      {/* Collapse Toggle - moved to bottom */}
-      <div className="border-t p-4">
+      {/* User Profile Section */}
+      {userProfile && (
+        <div className="border-t p-4">
+          <div className={cn(
+            "flex items-center gap-3 p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors",
+            isCollapsed && "justify-center"
+          )}>
+            <div className="h-8 w-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-medium">
+              {userProfile.first_name?.[0]}{userProfile.last_name?.[0]}
+            </div>
+            {!isCollapsed && (
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-900 truncate">
+                  {userProfile.first_name} {userProfile.last_name}
+                </p>
+                <p className="text-xs text-gray-500 truncate">{userProfile.email}</p>
+                <div className="flex items-center gap-1 mt-1">
+                  <Shield
+                    className={cn(
+                      "h-3 w-3",
+                      isAdmin ? "text-red-500" : isManager ? "text-purple-500" : "text-blue-500",
+                    )}
+                  />
+                  <span
+                    className={cn(
+                      "text-xs font-medium",
+                      isAdmin ? "text-red-600" : isManager ? "text-purple-600" : "text-blue-600",
+                    )}
+                  >
+                    {userProfile.role
+                      ?.replace("_", " ")
+                      .split(" ")
+                      .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
+                      .join(" ") || "HR"}
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Collapse Toggle and Logout */}
+      <div className="border-t p-4 space-y-2">
         <Button
           variant="ghost"
           size="sm"
@@ -616,6 +714,25 @@ export function AppSidebar() {
           {isCollapsed && (
             <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 whitespace-nowrap">
               Expand Sidebar
+            </div>
+          )}
+        </Button>
+        
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleLogout}
+          className={cn(
+            "w-full justify-start gap-3 text-red-600 hover:bg-red-50 hover:text-red-700 transition-all duration-200 group",
+            isCollapsed && "justify-center",
+          )}
+          title={isCollapsed ? "Logout" : "Logout"}
+        >
+          <LogOut className="h-4 w-4 group-hover:scale-110 transition-transform" />
+          {!isCollapsed && <span className="text-sm font-medium">Logout</span>}
+          {isCollapsed && (
+            <div className="absolute left-full ml-2 px-2 py-1 bg-red-900 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 whitespace-nowrap">
+              Logout
             </div>
           )}
         </Button>
