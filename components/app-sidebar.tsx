@@ -246,23 +246,23 @@ export function AppSidebar({ user: propUser }: AppSidebarProps = {}) {
   useEffect(() => {
     // Only fetch user data if no prop user is provided
     if (!propUser) {
-      const getUser = async () => {
-        try {
-          const response = await fetch("/api/auth/me")
-          const data = await response.json()
+    const getUser = async () => {
+      try {
+        const response = await fetch("/api/auth/me")
+        const data = await response.json()
 
-          if (data.success && data.user) {
-            setUser(data.user)
-            setUserProfile(data.user)
-            console.log("[Sidebar] User loaded:", data.user)
-          } else {
-            console.error("[Sidebar] Failed to load user:", data.error)
-          }
-        } catch (error) {
-          console.error("[Sidebar] Error fetching user:", error)
+        if (data.success && data.user) {
+          setUser(data.user)
+          setUserProfile(data.user)
+          console.log("[Sidebar] User loaded:", data.user)
+        } else {
+          console.error("[Sidebar] Failed to load user:", data.error)
         }
+      } catch (error) {
+        console.error("[Sidebar] Error fetching user:", error)
       }
-      getUser()
+    }
+    getUser()
     } else {
       // Use prop user data
       setUser(propUser)

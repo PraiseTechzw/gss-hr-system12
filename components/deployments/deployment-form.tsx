@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { ShiftTimePicker } from "@/components/ui/shift-time-picker"
 import { AlertCircle, MapPin, Calendar, DollarSign, Clock, User, Building, FileText, CheckCircle2 } from "lucide-react"
 
 type Employee = {
@@ -30,7 +31,9 @@ type DeploymentFormData = {
   site_location: string
   deployment_type: string
   start_date: string
+  start_time: string
   end_date: string
+  end_time: string
   shift_timing: string
   daily_rate: string
   monthly_salary: string
@@ -69,7 +72,9 @@ export function DeploymentForm({
     site_location: deployment?.site_location || "",
     deployment_type: deployment?.deployment_type || "permanent",
     start_date: deployment?.start_date || "",
+    start_time: deployment?.start_time || "08:00",
     end_date: deployment?.end_date || "",
+    end_time: deployment?.end_time || "17:00",
     shift_timing: deployment?.shift_timing || "",
     daily_rate: deployment?.daily_rate || "",
     monthly_salary: deployment?.monthly_salary || "",
@@ -469,42 +474,59 @@ export function DeploymentForm({
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="shift_timing">
-                    <Clock className="inline h-4 w-4 mr-1" />
-                    Shift Timing
-                  </Label>
-                  <Input
-                    id="shift_timing"
+                  <ShiftTimePicker
                     value={formData.shift_timing}
-                    onChange={(e) => updateFormData('shift_timing', e.target.value)}
-                    placeholder="e.g., 08:00 - 17:00"
+                    onChange={(value) => updateFormData('shift_timing', value)}
+                    label="Shift Timing"
+                    required={false}
+                    error={validationErrors.shift_timing}
                   />
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="start_date">
-                    Start Date <span className="text-red-500">*</span>
+                    Start Date & Time <span className="text-red-500">*</span>
                   </Label>
-                  <Input
-                    id="start_date"
-                    type="date"
-                    value={formData.start_date}
-                    onChange={(e) => updateFormData('start_date', e.target.value)}
-                    className={validationErrors.start_date ? 'border-red-500' : ''}
-                  />
+                  <div className="grid grid-cols-2 gap-2">
+                    <Input
+                      id="start_date"
+                      type="date"
+                      value={formData.start_date}
+                      onChange={(e) => updateFormData('start_date', e.target.value)}
+                      className={validationErrors.start_date ? 'border-red-500' : ''}
+                    />
+                    <Input
+                      id="start_time"
+                      type="time"
+                      value={formData.start_time}
+                      onChange={(e) => updateFormData('start_time', e.target.value)}
+                      className={validationErrors.start_time ? 'border-red-500' : ''}
+                    />
+                  </div>
                   {validationErrors.start_date && <ErrorMessage error={validationErrors.start_date} />}
+                  {validationErrors.start_time && <ErrorMessage error={validationErrors.start_time} />}
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="end_date">End Date</Label>
-                  <Input
-                    id="end_date"
-                    type="date"
-                    value={formData.end_date}
-                    onChange={(e) => updateFormData('end_date', e.target.value)}
-                    className={validationErrors.end_date ? 'border-red-500' : ''}
-                  />
+                  <Label htmlFor="end_date">End Date & Time</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Input
+                      id="end_date"
+                      type="date"
+                      value={formData.end_date}
+                      onChange={(e) => updateFormData('end_date', e.target.value)}
+                      className={validationErrors.end_date ? 'border-red-500' : ''}
+                    />
+                    <Input
+                      id="end_time"
+                      type="time"
+                      value={formData.end_time}
+                      onChange={(e) => updateFormData('end_time', e.target.value)}
+                      className={validationErrors.end_time ? 'border-red-500' : ''}
+                    />
+                  </div>
                   {validationErrors.end_date && <ErrorMessage error={validationErrors.end_date} />}
+                  {validationErrors.end_time && <ErrorMessage error={validationErrors.end_time} />}
                   <p className="text-sm text-gray-500">Leave empty for ongoing deployments</p>
                 </div>
 
