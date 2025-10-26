@@ -9,6 +9,7 @@ import { MobileBlocker } from "@/components/ui/mobile-blocker"
 import { Toaster } from "sonner"
 import { AuthProvider } from "@/lib/auth-context"
 import { ThemeProvider } from "@/components/theme-provider"
+import { SettingsProvider } from "@/lib/settings-context"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -44,10 +45,12 @@ export default function RootLayout({
           <MobileBlocker />
           <ServiceWorkerRegister />
           <AuthProvider>
-            <OfflineProvider>
-              {children}
-              <SyncIndicator />
-            </OfflineProvider>
+            <SettingsProvider>
+              <OfflineProvider>
+                {children}
+                <SyncIndicator />
+              </OfflineProvider>
+            </SettingsProvider>
           </AuthProvider>
           <Toaster position="top-right" expand={true} richColors={true} closeButton={true} />
         </ThemeProvider>

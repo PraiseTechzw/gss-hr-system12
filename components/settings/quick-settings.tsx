@@ -23,11 +23,25 @@ import {
 } from "lucide-react"
 
 import { createClient } from "@/lib/supabase/client"
+import { useSettings } from "@/lib/settings-context"
 
 export function QuickSettings() {
-  const supabase = createClient()
+  const { settings: globalSettings, updateSetting, loading } = useSettings()
   const [isSaving, setIsSaving] = useState(false)
-  const [settings, setSettings] = useState({
+  
+  // Convert global settings to local format
+  const settings = globalSettings ? {
+    emailNotifications: globalSettings.email_notifications,
+    smsAlerts: globalSettings.sms_alerts,
+    darkMode: globalSettings.dark_mode,
+    autoBackup: globalSettings.auto_backup,
+    twoFactorAuth: globalSettings.two_factor_auth,
+    dataEncryption: globalSettings.data_encryption,
+    systemMaintenance: globalSettings.system_maintenance,
+    apiAccess: globalSettings.api_access,
+    auditLogging: globalSettings.audit_logging,
+    passwordExpiry: globalSettings.password_expiry,
+  } : {
     emailNotifications: true,
     smsAlerts: false,
     darkMode: false,
@@ -38,70 +52,33 @@ export function QuickSettings() {
     apiAccess: true,
     auditLogging: true,
     passwordExpiry: false
-  })
-
-  useEffect(() => {
-    async function load() {
-      try {
-        const { data, error } = await supabase.from("system_settings_new").select("*").limit(1).maybeSingle()
-        if (error) {
-          console.error("Error loading settings:", error)
-          return
-        }
-        if (data) {
-          setSettings({
-            emailNotifications: !!data.email_notifications,
-            smsAlerts: !!data.sms_alerts,
-            darkMode: !!data.dark_mode,
-            autoBackup: !!data.auto_backup,
-            twoFactorAuth: !!data.two_factor_auth,
-            dataEncryption: !!data.data_encryption,
-            systemMaintenance: !!data.system_maintenance,
-            apiAccess: !!data.api_access,
-            auditLogging: !!data.audit_logging,
-            passwordExpiry: !!data.password_expiry,
-          })
-          
-          // Apply dark mode immediately if enabled
-          if (data.dark_mode) {
-            document.documentElement.classList.add('dark')
-          } else {
-            document.documentElement.classList.remove('dark')
-          }
-        }
-      } catch (err) {
-        console.error("Failed to load settings:", err)
-      }
-    }
-    load()
-  }, [supabase])
+  }
 
   const handleToggle = async (setting: keyof typeof settings) => {
     const next = !settings[setting]
-    setSettings(prev => ({ ...prev, [setting]: next }))
     setIsSaving(true)
-    const columnMap: Record<string, string> = {
-      emailNotifications: "email_notifications",
-      smsAlerts: "sms_alerts",
-      darkMode: "dark_mode",
-      autoBackup: "auto_backup",
-      twoFactorAuth: "two_factor_auth",
-      dataEncryption: "data_encryption",
-      systemMaintenance: "system_maintenance",
-      apiAccess: "api_access",
-      auditLogging: "audit_logging",
-      passwordExpiry: "password_expiry",
-    }
-    await supabase.from("system_settings").update({ [columnMap[setting]]: next, updated_at: new Date().toISOString() }).neq("id", "00000000-0000-0000-0000-000000000000")
-    if (setting === 'darkMode') {
-      const root = document.documentElement
-      if (next) {
-        root.classList.add('dark')
-      } else {
-        root.classList.remove('dark')
+    
+    try {
+      const columnMap: Record<string, string> = {
+        emailNotifications: "email_notifications",
+        smsAlerts: "sms_alerts",
+        darkMode: "dark_mode",
+        autoBackup: "auto_backup",
+        twoFactorAuth: "two_factor_auth",
+        dataEncryption: "data_encryption",
+        systemMaintenance: "system_maintenance",
+        apiAccess: "api_access",
+        auditLogging: "audit_logging",
+        passwordExpiry: "password_expiry",
       }
+      
+      await updateSetting(columnMap[setting] as any, next)
+      
+    } catch (err) {
+      console.error("Failed to update setting:", err)
+    } finally {
+      setIsSaving(false)
     }
-    setIsSaving(false)
   }
 
   const quickSettingsItems = [
