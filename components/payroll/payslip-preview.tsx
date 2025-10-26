@@ -23,7 +23,7 @@ export function PayslipPreview({ payslipData, isOpen, onClose, onPrint, onDownlo
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-7xl w-[95vw] max-h-[90vh] overflow-y-auto p-0">
+      <DialogContent className="w-screen h-screen max-w-none max-h-none overflow-y-auto p-0">
         <div className="space-y-6">
           <div className="flex items-center justify-between p-4">
             <Button variant="ghost" size="sm" onClick={onClose}>
