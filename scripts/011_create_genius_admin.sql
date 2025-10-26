@@ -51,3 +51,4 @@ SELECT 'Genius Security admin user created successfully!' as message,
        'Please change the password after first login' as security_note;
 
 
+

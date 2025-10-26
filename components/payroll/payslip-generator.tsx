@@ -405,11 +405,11 @@ export function PayslipGenerator({ payrollRecords, employees }: PayslipGenerator
         </CardContent>
       </Card>
 
-      {/* Payslip Preview Modal */}
-      <PayslipPreview 
-        payslipData={previewData}
-        isOpen={isPreviewOpen}
-        onClose={() => setIsPreviewOpen(false)}
+      {/* Payslip Preview Full Screen */}
+      {isPreviewOpen && (
+        <PayslipPreview 
+          payslipData={previewData}
+          onClose={() => setIsPreviewOpen(false)}
         onPrint={() => {
           // Open the HTML file in a new window for printing
           const blob = new Blob([generateHTMLPayslip(previewData)], { type: 'text/html' })
@@ -431,7 +431,8 @@ export function PayslipGenerator({ payrollRecords, employees }: PayslipGenerator
           URL.revokeObjectURL(url)
           document.body.removeChild(a)
         }}
-      />
+        />
+      )}
     </div>
   )
 }

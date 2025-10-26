@@ -187,8 +187,6 @@ export function PayslipPreview({ payslipData, onClose, onPrint, onDownload }: Pa
               </div>
             </div>
           </div>
-        </div>
-      </DialogContent>
-    </Dialog>
+    </div>
   )
 }

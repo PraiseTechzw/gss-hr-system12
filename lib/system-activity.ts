@@ -1,104 +1,119 @@
-// Supabase client removed
+import { createClient } from "@/lib/supabase/client"
 
-export interface SystemActivityLog {
-  user_email: string
-  action_type: string
+export interface ActivityLog {
+  action: string
   description: string
-  metadata?: Record<string, any>
+  user_id?: string
+  details?: Record<string, any>
 }
 
-export async function logSystemActivity(activity: SystemActivityLog) {
-  const supabase = createClient()
+export class SystemActivityLogger {
+  private static supabase = createClient()
   
-  try {
-    const { error } = await supabase
-      .from('system_activity')
-      .insert([{
-        user_email: activity.user_email,
-        action_type: activity.action_type,
-        description: activity.description,
-        metadata: activity.metadata || null
-      }])
+  /**
+   * Log a system activity
+   */
+  static async logActivity(activity: ActivityLog): Promise<void> {
+    try {
+      const { error } = await this.supabase
+        .from('system_activity')
+        .insert({
+          action: activity.action,
+          description: activity.description,
+          user_id: activity.user_id,
+          details: activity.details,
+          created_at: new Date().toISOString()
+        })
 
-    if (error) {
+      if (error) {
+        console.error('Failed to log system activity:', error)
+      }
+    } catch (error) {
       console.error('Error logging system activity:', error)
     }
-  } catch (error) {
-    console.error('Error logging system activity:', error)
   }
-}
 
-// Predefined activity types
-export const ACTIVITY_TYPES = {
-  USER_SIGNUP: 'user_signup',
-  USER_APPROVED: 'user_approved',
-  USER_REJECTED: 'user_rejected',
-  USER_ROLE_CHANGED: 'user_role_changed',
-  EMPLOYEE_ADDED: 'employee_added',
-  EMPLOYEE_UPDATED: 'employee_updated',
-  EMPLOYEE_DELETED: 'employee_deleted',
-  DEPLOYMENT_CREATED: 'deployment_created',
-  DEPLOYMENT_UPDATED: 'deployment_updated',
-  DEPLOYMENT_DELETED: 'deployment_deleted',
-  LEAVE_REQUESTED: 'leave_requested',
-  LEAVE_APPROVED: 'leave_approved',
-  LEAVE_REJECTED: 'leave_rejected',
-  PAYROLL_PROCESSED: 'payroll_processed',
-  SETTINGS_UPDATED: 'settings_updated',
-  SYSTEM_MAINTENANCE: 'system_maintenance'
-} as const
+  /**
+   * Log employee-related activities
+   */
+  static async logEmployeeActivity(action: string, employeeName: string, userId?: string): Promise<void> {
+    await this.logActivity({
+      action: action,
+      description: `${action}: ${employeeName}`,
+      user_id: userId,
+      details: { action, employee_name: employeeName }
+    })
+  }
 
-// Helper functions for common activities
-export async function logUserSignup(userEmail: string, role: string) {
-  await logSystemActivity({
-    user_email: userEmail,
-    action_type: ACTIVITY_TYPES.USER_SIGNUP,
-    description: 'New user registered',
-    metadata: { user_email: userEmail, role }
-  })
-}
+  /**
+   * Log payroll-related activities
+   */
+  static async logPayrollActivity(action: string, description: string, userId?: string): Promise<void> {
+    await this.logActivity({
+      action: action,
+      description: `${action}: ${description}`,
+      user_id: userId,
+      details: { action, description }
+    })
+  }
 
-export async function logUserApproval(userEmail: string, approvedBy: string) {
-  await logSystemActivity({
-    user_email: approvedBy,
-    action_type: ACTIVITY_TYPES.USER_APPROVED,
-    description: 'User account approved',
-    metadata: { user_email: userEmail, approved_by: approvedBy }
-  })
-}
+  /**
+   * Log deployment-related activities
+   */
+  static async logDeploymentActivity(action: string, deploymentName: string, userId?: string): Promise<void> {
+    await this.logActivity({
+      action: action,
+      description: `${action}: ${deploymentName}`,
+      user_id: userId,
+      details: { action, deployment_name: deploymentName }
+    })
+  }
 
-export async function logUserRejection(userEmail: string, rejectedBy: string) {
-  await logSystemActivity({
-    user_email: rejectedBy,
-    action_type: ACTIVITY_TYPES.USER_REJECTED,
-    description: 'User account rejected',
-    metadata: { user_email: userEmail, rejected_by: rejectedBy }
-  })
-}
+  /**
+   * Log leave-related activities
+   */
+  static async logLeaveActivity(action: string, employeeName: string, userId?: string): Promise<void> {
+    await this.logActivity({
+      action: action,
+      description: `${action}: ${employeeName}`,
+      user_id: userId,
+      details: { action, employee_name: employeeName }
+    })
+  }
 
-export async function logUserRoleChange(userEmail: string, oldRole: string, newRole: string, changedBy: string) {
-  await logSystemActivity({
-    user_email: changedBy,
-    action_type: ACTIVITY_TYPES.USER_ROLE_CHANGED,
-    description: 'User role changed',
-    metadata: { user_email: userEmail, old_role: oldRole, new_role: newRole, changed_by: changedBy }
-  })
-}
+  /**
+   * Log attendance-related activities
+   */
+  static async logAttendanceActivity(action: string, description: string, userId?: string): Promise<void> {
+    await this.logActivity({
+      action: action,
+      description: `${action}: ${description}`,
+      user_id: userId,
+      details: { action, description }
+    })
+  }
 
-export async function logEmployeeAdded(employeeId: string, employeeName: string, addedBy: string) {
-  await logSystemActivity({
-    user_email: addedBy,
-    action_type: ACTIVITY_TYPES.EMPLOYEE_ADDED,
-    description: 'New employee added',
-    metadata: { employee_id: employeeId, employee_name: employeeName, added_by: addedBy }
-  })
-}
+  /**
+   * Log user authentication activities
+   */
+  static async logAuthActivity(action: string, userEmail: string, userId?: string): Promise<void> {
+    await this.logActivity({
+      action: action,
+      description: `${action}: ${userEmail}`,
+      user_id: userId,
+      details: { action, user_email: userEmail }
+    })
+  }
 
-export async function logSettingsUpdate(updatedBy: string, settings: string[]) {
-  await logSystemActivity({
-    user_email: updatedBy,
-    action_type: ACTIVITY_TYPES.SETTINGS_UPDATED,
-    description: 'System settings updated',
-    metadata: { updated_by: updatedBy, settings_updated: settings }
-  })
+  /**
+   * Log system activities
+   */
+  static async logSystemActivity(action: string, description: string, userId?: string): Promise<void> {
+    await this.logActivity({
+      action: action,
+      description: `${action}: ${description}`,
+      user_id: userId,
+      details: { action, description }
+    })
+  }
 }

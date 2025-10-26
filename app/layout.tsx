@@ -8,6 +8,7 @@ import { SyncIndicator } from "@/components/pwa/sync-indicator"
 import { MobileBlocker } from "@/components/ui/mobile-blocker"
 import { Toaster } from "sonner"
 import { AuthProvider } from "@/lib/auth-context"
+import { ThemeProvider } from "@/components/theme-provider"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -32,17 +33,24 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} antialiased`}>
+    <html lang="en" className={`${inter.variable} antialiased`} suppressHydrationWarning>
       <body>
-        <MobileBlocker />
-        <ServiceWorkerRegister />
-        <AuthProvider>
-          <OfflineProvider>
-            {children}
-            <SyncIndicator />
-          </OfflineProvider>
-        </AuthProvider>
-        <Toaster position="top-right" expand={true} richColors={true} closeButton={true} />
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <MobileBlocker />
+          <ServiceWorkerRegister />
+          <AuthProvider>
+            <OfflineProvider>
+              {children}
+              <SyncIndicator />
+            </OfflineProvider>
+          </AuthProvider>
+          <Toaster position="top-right" expand={true} richColors={true} closeButton={true} />
+        </ThemeProvider>
       </body>
     </html>
   )

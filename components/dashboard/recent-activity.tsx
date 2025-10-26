@@ -76,28 +76,37 @@ export function RecentActivity() {
     async function fetchActivity() {
       try {
         const supabase = createClient()
+        
+        // Fetch real data from system_activity table
         const { data, error } = await supabase
           .from('system_activity')
           .select('*')
           .order('created_at', { ascending: false })
-          .limit(5)
+          .limit(10)
         
         if (error) {
           console.error("Error fetching activity:", error)
+          setActivities([])
           return
         }
         
-        const formattedActivities = data?.map(activity => ({
-          type: activity.action_type || 'system',
-          title: activity.description || 'System activity',
-          description: `Action: ${activity.action_type}`,
-          timestamp: activity.created_at,
-          icon: 'Clock'
-        })) || []
-        
-        setActivities(formattedActivities)
+        if (data && data.length > 0) {
+          const formattedActivities = data.map(activity => ({
+            type: activity.action || 'system',
+            title: activity.description || 'System activity',
+            description: `Action: ${activity.action}`,
+            timestamp: activity.created_at,
+            icon: 'Clock'
+          }))
+          
+          setActivities(formattedActivities)
+        } else {
+          // No data found - show empty state
+          setActivities([])
+        }
       } catch (error) {
         console.error("Error fetching recent activity:", error)
+        setActivities([])
       } finally {
         setLoading(false)
       }
@@ -119,11 +128,11 @@ export function RecentActivity() {
           <div className="space-y-3">
             {[...Array(5)].map((_, i) => (
               <div key={i} className="flex items-start gap-3 p-3">
-                <div className="w-8 h-8 bg-gray-200 rounded-lg animate-pulse"></div>
+                <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse"></div>
                 <div className="flex-1 space-y-2">
-                  <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
-                  <div className="h-3 bg-gray-200 rounded w-3/4 animate-pulse"></div>
-                  <div className="h-3 bg-gray-200 rounded w-1/2 animate-pulse"></div>
+                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                  <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-3/4 animate-pulse"></div>
+                  <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2 animate-pulse"></div>
                 </div>
               </div>
             ))}
@@ -142,34 +151,44 @@ export function RecentActivity() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="space-y-3">
-          {activities.map((activity, index) => {
-            const ActivityIcon = getActivityIcon(activity.type)
-            const typeColor = getTypeColor(activity.type)
-            return (
-              <div key={index} className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50/50 transition-colors">
-                <div className={`p-2 rounded-lg bg-gray-100 ${typeColor}`}>
-                  <ActivityIcon className="h-4 w-4" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm font-medium text-gray-900">{activity.title}</p>
-                    <Badge variant="outline" className="text-xs capitalize">
-                      {activity.type}
-                    </Badge>
+        {activities.length === 0 ? (
+          <div className="text-center py-8">
+            <Clock className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <p className="text-gray-500 text-sm">No recent activity</p>
+            <p className="text-gray-400 text-xs mt-1">Activity will appear here as users interact with the system</p>
+          </div>
+        ) : (
+          <>
+            <div className="space-y-3">
+              {activities.map((activity, index) => {
+                const ActivityIcon = getActivityIcon(activity.type)
+                const typeColor = getTypeColor(activity.type)
+                return (
+                  <div key={index} className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors">
+                    <div className={`p-2 rounded-lg bg-gray-100 dark:bg-gray-800 ${typeColor}`}>
+                      <ActivityIcon className="h-4 w-4" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{activity.title}</p>
+                        <Badge variant="outline" className="text-xs capitalize">
+                          {activity.type}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">{activity.description}</p>
+                      <p className="text-xs text-gray-400 dark:text-gray-500">{getTimeAgo(activity.timestamp)}</p>
+                    </div>
                   </div>
-                  <p className="text-sm text-gray-500">{activity.description}</p>
-                  <p className="text-xs text-gray-400">{getTimeAgo(activity.timestamp)}</p>
-                </div>
-              </div>
-            )
-          })}
-        </div>
-        <div className="pt-2 border-t">
-          <button className="text-sm text-[#a2141e] hover:underline font-medium">
-            View all activity
-          </button>
-        </div>
+                )
+              })}
+            </div>
+            <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
+              <button className="text-sm text-[#a2141e] dark:text-red-400 hover:underline font-medium">
+                View all activity
+              </button>
+            </div>
+          </>
+        )}
       </CardContent>
     </Card>
   )

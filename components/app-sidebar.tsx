@@ -35,11 +35,29 @@ const quickActions = [
   { name: "Create User", href: "/admin/create-user", icon: UserPlus, roles: ["admin"] },
 ]
 
-export function AppSidebar() {
+interface AppSidebarProps {
+  user?: {
+    id: string
+    email: string
+    first_name: string
+    last_name: string
+    full_name: string
+    role: "admin" | "manager" | "hr"
+    department_id?: string
+    position?: string
+    status: string
+    created_at?: string
+    last_login?: string
+    phone?: string
+    address?: string
+  }
+}
+
+export function AppSidebar({ user: propUser }: AppSidebarProps = {}) {
   const pathname = usePathname()
   const router = useRouter()
-  const [user, setUser] = useState<any>(null)
-  const [userProfile, setUserProfile] = useState<any>(null)
+  const [user, setUser] = useState<any>(propUser || null)
+  const [userProfile, setUserProfile] = useState<any>(propUser || null)
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [recentPages, setRecentPages] = useState<string[]>([])
@@ -172,6 +190,8 @@ export function AppSidebar() {
     userRole,
     normalizedRole,
     isAdmin,
+    isManager,
+    isHR,
     adminNavigation: adminNavigation.length,
     baseNavigation: baseNavigation.length,
   })
@@ -224,23 +244,31 @@ export function AppSidebar() {
   })
 
   useEffect(() => {
-    const getUser = async () => {
-      try {
-        const response = await fetch("/api/auth/me")
-        const data = await response.json()
+    // Only fetch user data if no prop user is provided
+    if (!propUser) {
+      const getUser = async () => {
+        try {
+          const response = await fetch("/api/auth/me")
+          const data = await response.json()
 
-        if (data.success && data.user) {
-          setUser(data.user)
-          setUserProfile(data.user)
-          console.log("[Sidebar] User loaded:", data.user)
-        } else {
-          console.error("[Sidebar] Failed to load user:", data.error)
+          if (data.success && data.user) {
+            setUser(data.user)
+            setUserProfile(data.user)
+            console.log("[Sidebar] User loaded:", data.user)
+          } else {
+            console.error("[Sidebar] Failed to load user:", data.error)
+          }
+        } catch (error) {
+          console.error("[Sidebar] Error fetching user:", error)
         }
-      } catch (error) {
-        console.error("[Sidebar] Error fetching user:", error)
       }
+      getUser()
+    } else {
+      // Use prop user data
+      setUser(propUser)
+      setUserProfile(propUser)
+      console.log("[Sidebar] Using prop user:", propUser)
     }
-    getUser()
 
     const savedRecent = localStorage.getItem("recentPages")
     if (savedRecent) {
@@ -251,7 +279,7 @@ export function AppSidebar() {
     if (savedFavorites) {
       setFavoritePages(JSON.parse(savedFavorites))
     }
-  }, [])
+  }, [propUser])
 
   useEffect(() => {
     if (pathname) {
@@ -304,32 +332,41 @@ export function AppSidebar() {
   return (
     <div
       className={cn(
-        "flex h-screen flex-col border-r bg-white shadow-lg transition-all duration-300",
+        "flex h-screen flex-col border-r shadow-lg transition-all duration-300",
+        "bg-white dark:bg-gray-900",
+        "border-gray-200 dark:border-gray-700",
         isCollapsed ? "w-16" : "w-64",
       )}
     >
       {/* Header */}
-      <div className="flex h-16 items-center justify-center border-b px-4">
+      <div className={cn(
+        "flex h-16 items-center justify-center border-b px-4",
+        "border-gray-200 dark:border-gray-700"
+      )}>
         {!isCollapsed ? (
           <div className="flex items-center gap-3 w-full">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white shadow-md border border-gray-200">
+            <div className={cn(
+              "flex h-10 w-10 items-center justify-center rounded-lg shadow-md border",
+              "bg-white dark:bg-gray-800",
+              "border-gray-200 dark:border-gray-600"
+            )}>
               <img src="/logo.png" alt="GSS Logo" className="h-8 w-8 object-contain" />
             </div>
             <div>
-              <h1 className="text-lg font-bold text-gray-900">GSS</h1>
-              <p className="text-xs text-gray-500">HR Management</p>
+              <h1 className="text-lg font-bold text-gray-900 dark:text-gray-100">GSS</h1>
+              <p className="text-xs text-gray-500 dark:text-gray-400">HR Management</p>
               {userProfile?.role && (
                 <div className="flex items-center gap-1 mt-1">
                   <Shield
                     className={cn(
                       "h-3 w-3",
-                      isAdmin ? "text-red-500" : isManager ? "text-purple-500" : "text-blue-500",
+                      isAdmin ? "text-red-500 dark:text-red-400" : isManager ? "text-purple-500 dark:text-purple-400" : "text-blue-500 dark:text-blue-400",
                     )}
                   />
                   <span
                     className={cn(
                       "text-xs font-medium",
-                      isAdmin ? "text-red-600" : isManager ? "text-purple-600" : "text-blue-600",
+                      isAdmin ? "text-red-600 dark:text-red-400" : isManager ? "text-purple-600 dark:text-purple-400" : "text-blue-600 dark:text-blue-400",
                     )}
                   >
                     {userProfile.role
@@ -343,7 +380,11 @@ export function AppSidebar() {
             </div>
           </div>
         ) : (
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white shadow-md border border-gray-200 hover:shadow-lg transition-shadow">
+          <div className={cn(
+            "flex h-10 w-10 items-center justify-center rounded-lg shadow-md border hover:shadow-lg transition-shadow",
+            "bg-white dark:bg-gray-800",
+            "border-gray-200 dark:border-gray-600"
+          )}>
             <img src="/logo.png" alt="GSS Logo" className="h-8 w-8 object-contain" />
           </div>
         )}
@@ -351,14 +392,23 @@ export function AppSidebar() {
 
       {/* Search */}
       {!isCollapsed && (
-        <div className="p-4 border-b">
+        <div className={cn(
+          "p-4 border-b",
+          "border-gray-200 dark:border-gray-700"
+        )}>
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
             <Input
               placeholder="Search navigation..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 h-9"
+              className={cn(
+                "pl-10 h-9",
+                "bg-white dark:bg-gray-800",
+                "border-gray-300 dark:border-gray-600",
+                "text-gray-900 dark:text-gray-100",
+                "placeholder-gray-500 dark:placeholder-gray-400"
+              )}
             />
           </div>
         </div>
@@ -369,7 +419,7 @@ export function AppSidebar() {
         {/* Quick Actions */}
         <div className="space-y-2">
           {!isCollapsed && (
-            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Quick Actions</h3>
+            <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Quick Actions</h3>
           )}
           <div className="space-y-1">
             {quickActions.filter(action => {
@@ -392,7 +442,10 @@ export function AppSidebar() {
                 key={action.name}
                 href={action.href}
                 className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors group relative",
+                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors group relative",
+                  "text-gray-600 dark:text-gray-300",
+                  "hover:bg-gray-100 dark:hover:bg-gray-800",
+                  "hover:text-gray-900 dark:hover:text-gray-100",
                   isCollapsed && "justify-center",
                 )}
                 title={isCollapsed ? action.name : undefined}
@@ -400,7 +453,7 @@ export function AppSidebar() {
                 <action.icon className="h-4 w-4 flex-shrink-0 group-hover:scale-110 transition-transform" />
                 {!isCollapsed && action.name}
                 {isCollapsed && (
-                  <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 whitespace-nowrap">
+                  <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 whitespace-nowrap">
                     {action.name}
                   </div>
                 )}
@@ -413,7 +466,7 @@ export function AppSidebar() {
         {favoriteNavigation.length > 0 && (
           <div className="space-y-2">
             {!isCollapsed && (
-              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Favorites</h3>
+              <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Favorites</h3>
             )}
             <div className="space-y-1">
               {favoriteNavigation.map((item) => {
@@ -425,8 +478,8 @@ export function AppSidebar() {
                     className={cn(
                       "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 group relative",
                       isActive
-                        ? "bg-[#a2141e] text-white shadow-md"
-                        : "text-gray-700 hover:bg-gray-100 hover:shadow-sm",
+                        ? "bg-[#a2141e] dark:bg-red-600 text-white shadow-md"
+                        : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:shadow-sm",
                       isCollapsed && "justify-center",
                     )}
                     title={isCollapsed ? item?.name : undefined}
@@ -437,7 +490,7 @@ export function AppSidebar() {
                     {!isCollapsed && item?.name}
                     {!isCollapsed && <Star className="h-4 w-4 ml-auto text-yellow-500 flex-shrink-0" />}
                     {isCollapsed && (
-                      <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 whitespace-nowrap">
+                      <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 whitespace-nowrap">
                         {item?.name}
                         <Star className="h-3 w-3 text-yellow-400 ml-1 inline" />
                       </div>
@@ -452,7 +505,7 @@ export function AppSidebar() {
         {/* Recent Pages */}
         {recentNavigation.length > 0 && (
           <div className="space-y-2">
-            {!isCollapsed && <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Recent</h3>}
+            {!isCollapsed && <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Recent</h3>}
             <div className="space-y-1">
               {recentNavigation.map((item) => {
                 const isActive = pathname === item?.href
@@ -463,8 +516,8 @@ export function AppSidebar() {
                     className={cn(
                       "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 group relative",
                       isActive
-                        ? "bg-[#a2141e] text-white shadow-md"
-                        : "text-gray-700 hover:bg-gray-100 hover:shadow-sm",
+                        ? "bg-[#a2141e] dark:bg-red-600 text-white shadow-md"
+                        : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:shadow-sm",
                       isCollapsed && "justify-center",
                     )}
                     title={isCollapsed ? item?.name : undefined}
@@ -475,7 +528,7 @@ export function AppSidebar() {
                     {!isCollapsed && item?.name}
                     {!isCollapsed && <Clock className="h-4 w-4 ml-auto text-gray-400 flex-shrink-0" />}
                     {isCollapsed && (
-                      <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 whitespace-nowrap">
+                      <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 whitespace-nowrap">
                         {item?.name}
                         <Clock className="h-3 w-3 text-gray-400 ml-1 inline" />
                       </div>
@@ -489,7 +542,7 @@ export function AppSidebar() {
 
         {/* Main Navigation */}
         <div className="space-y-2">
-          {!isCollapsed && <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Navigation</h3>}
+          {!isCollapsed && <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Navigation</h3>}
           <div className="space-y-1">
             {baseFilteredNavigation.map((item) => {
               const isActive = pathname === item.href
@@ -501,8 +554,8 @@ export function AppSidebar() {
                     className={cn(
                       "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 group relative",
                       isActive
-                        ? "bg-[#a2141e] text-white shadow-md"
-                        : "text-gray-700 hover:bg-gray-100 hover:shadow-sm",
+                        ? "bg-[#a2141e] dark:bg-red-600 text-white shadow-md"
+                        : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:shadow-sm",
                     )}
                     title={isCollapsed ? item.name : undefined}
                   >
@@ -552,7 +605,7 @@ export function AppSidebar() {
                       </>
                     )}
                     {isCollapsed && (
-                      <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 whitespace-nowrap">
+                      <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 whitespace-nowrap">
                         {item.name}
                         {item.badge && <span className="ml-1 bg-gray-700 px-1 rounded text-xs">{item.badge}</span>}
                         {(item as any).isAdmin && (
@@ -574,7 +627,7 @@ export function AppSidebar() {
         {isAdmin && adminFilteredNavigation.length > 0 && (
           <div className="space-y-2">
             {!isCollapsed && (
-              <h3 className="text-xs font-semibold text-red-600 uppercase tracking-wider flex items-center gap-1">
+              <h3 className="text-xs font-semibold text-red-600 dark:text-red-400 uppercase tracking-wider flex items-center gap-1">
                 <Shield className="h-3 w-3" />
                 Admin Only
               </h3>
@@ -588,10 +641,11 @@ export function AppSidebar() {
                     <Link
                       href={item.href}
                       className={cn(
-                        "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 group relative border-l-2 border-red-200",
+                        "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 group relative border-l-2",
+                        "border-red-200 dark:border-red-800",
                         isActive
-                          ? "bg-red-50 text-red-900 shadow-md border-red-400"
-                          : "text-gray-700 hover:bg-red-50 hover:shadow-sm hover:border-red-300",
+                          ? "bg-red-50 dark:bg-red-900/20 text-red-900 dark:text-red-100 shadow-md border-red-400 dark:border-red-600"
+                          : "text-gray-700 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/20 hover:shadow-sm hover:border-red-300 dark:hover:border-red-700",
                       )}
                       title={isCollapsed ? item.name : undefined}
                     >
@@ -634,7 +688,7 @@ export function AppSidebar() {
                         </>
                       )}
                       {isCollapsed && (
-                        <div className="absolute left-full ml-2 px-2 py-1 bg-red-900 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 whitespace-nowrap">
+                        <div className="absolute left-full ml-2 px-2 py-1 bg-red-900 dark:bg-red-800 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 whitespace-nowrap">
                           {item.name}
                           <span className="ml-1 bg-red-600 px-1 rounded text-xs flex items-center gap-1">
                             <Shield className="h-3 w-3" />
@@ -653,9 +707,14 @@ export function AppSidebar() {
 
       {/* User Profile Section */}
       {userProfile && (
-        <div className="border-t p-4">
+        <div className={cn(
+          "border-t p-4",
+          "border-gray-200 dark:border-gray-700"
+        )}>
           <div className={cn(
-            "flex items-center gap-3 p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors",
+            "flex items-center gap-3 p-3 rounded-lg transition-colors",
+            "bg-gray-50 dark:bg-gray-800",
+            "hover:bg-gray-100 dark:hover:bg-gray-700",
             isCollapsed && "justify-center"
           )}>
             <div className="h-8 w-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-medium">
@@ -663,21 +722,21 @@ export function AppSidebar() {
             </div>
             {!isCollapsed && (
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
                   {userProfile.first_name} {userProfile.last_name}
                 </p>
-                <p className="text-xs text-gray-500 truncate">{userProfile.email}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{userProfile.email}</p>
                 <div className="flex items-center gap-1 mt-1">
                   <Shield
                     className={cn(
                       "h-3 w-3",
-                      isAdmin ? "text-red-500" : isManager ? "text-purple-500" : "text-blue-500",
+                      isAdmin ? "text-red-500 dark:text-red-400" : isManager ? "text-purple-500 dark:text-purple-400" : "text-blue-500 dark:text-blue-400",
                     )}
                   />
                   <span
                     className={cn(
                       "text-xs font-medium",
-                      isAdmin ? "text-red-600" : isManager ? "text-purple-600" : "text-blue-600",
+                      isAdmin ? "text-red-600 dark:text-red-400" : isManager ? "text-purple-600 dark:text-purple-400" : "text-blue-600 dark:text-blue-400",
                     )}
                   >
                     {userProfile.role
@@ -694,13 +753,18 @@ export function AppSidebar() {
       )}
 
       {/* Collapse Toggle and Logout */}
-      <div className="border-t p-4 space-y-2">
+      <div className={cn(
+        "border-t p-4 space-y-2",
+        "border-gray-200 dark:border-gray-700"
+      )}>
         <Button
           variant="ghost"
           size="sm"
           onClick={() => setIsCollapsed(!isCollapsed)}
           className={cn(
-            "w-full justify-start gap-3 text-gray-700 hover:bg-gray-100 hover:shadow-sm transition-all duration-200 group",
+            "w-full justify-start gap-3 transition-all duration-200 group",
+            "text-gray-700 dark:text-gray-300",
+            "hover:bg-gray-100 dark:hover:bg-gray-800 hover:shadow-sm",
             isCollapsed && "justify-center",
           )}
           title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
@@ -712,7 +776,7 @@ export function AppSidebar() {
           )}
           {!isCollapsed && <span className="text-sm font-medium">Collapse Sidebar</span>}
           {isCollapsed && (
-            <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 whitespace-nowrap">
+            <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 whitespace-nowrap">
               Expand Sidebar
             </div>
           )}
@@ -723,7 +787,9 @@ export function AppSidebar() {
           size="sm"
           onClick={handleLogout}
           className={cn(
-            "w-full justify-start gap-3 text-red-600 hover:bg-red-50 hover:text-red-700 transition-all duration-200 group",
+            "w-full justify-start gap-3 transition-all duration-200 group",
+            "text-red-600 dark:text-red-400",
+            "hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-700 dark:hover:text-red-300",
             isCollapsed && "justify-center",
           )}
           title={isCollapsed ? "Logout" : "Logout"}
@@ -731,7 +797,7 @@ export function AppSidebar() {
           <LogOut className="h-4 w-4 group-hover:scale-110 transition-transform" />
           {!isCollapsed && <span className="text-sm font-medium">Logout</span>}
           {isCollapsed && (
-            <div className="absolute left-full ml-2 px-2 py-1 bg-red-900 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 whitespace-nowrap">
+            <div className="absolute left-full ml-2 px-2 py-1 bg-red-900 dark:bg-red-800 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 whitespace-nowrap">
               Logout
             </div>
           )}
