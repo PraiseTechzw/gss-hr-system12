@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import { Download } from "lucide-react"
-// Supabase client removed
+import { createClient } from "@/lib/supabase/client"
 import { exportEmployeesToCSV, exportPayrollToCSV } from "@/lib/export-utils"
 
 type Props = {

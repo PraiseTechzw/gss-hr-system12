@@ -22,7 +22,7 @@ import {
   X
 } from "lucide-react"
 
-// Supabase client removed
+import { createClient } from "@/lib/supabase/client"
 
 export function QuickSettings() {
   const supabase = createClient()
@@ -42,20 +42,35 @@ export function QuickSettings() {
 
   useEffect(() => {
     async function load() {
-      const { data } = await supabase.from("system_settings").select("*").limit(1).maybeSingle()
-      if (data) {
-        setSettings({
-          emailNotifications: !!data.email_notifications,
-          smsAlerts: !!data.sms_alerts,
-          darkMode: !!data.dark_mode,
-          autoBackup: !!data.auto_backup,
-          twoFactorAuth: !!data.two_factor_auth,
-          dataEncryption: !!data.data_encryption,
-          systemMaintenance: !!data.system_maintenance,
-          apiAccess: !!data.api_access,
-          auditLogging: !!data.audit_logging,
-          passwordExpiry: !!data.password_expiry,
-        })
+      try {
+        const { data, error } = await supabase.from("system_settings_new").select("*").limit(1).maybeSingle()
+        if (error) {
+          console.error("Error loading settings:", error)
+          return
+        }
+        if (data) {
+          setSettings({
+            emailNotifications: !!data.email_notifications,
+            smsAlerts: !!data.sms_alerts,
+            darkMode: !!data.dark_mode,
+            autoBackup: !!data.auto_backup,
+            twoFactorAuth: !!data.two_factor_auth,
+            dataEncryption: !!data.data_encryption,
+            systemMaintenance: !!data.system_maintenance,
+            apiAccess: !!data.api_access,
+            auditLogging: !!data.audit_logging,
+            passwordExpiry: !!data.password_expiry,
+          })
+          
+          // Apply dark mode immediately if enabled
+          if (data.dark_mode) {
+            document.documentElement.classList.add('dark')
+          } else {
+            document.documentElement.classList.remove('dark')
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load settings:", err)
       }
     }
     load()
@@ -201,7 +216,7 @@ export function QuickSettings() {
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
             <Zap className="h-5 w-5" />
             Quick Settings
           </CardTitle>
@@ -214,8 +229,8 @@ export function QuickSettings() {
         {/* Category Summary */}
         <div className="grid gap-2 md:grid-cols-2">
           {Object.entries(categoryCounts).map(([category, counts]) => (
-            <div key={category} className="flex items-center justify-between p-2 rounded-lg bg-gray-50">
-              <span className="text-sm font-medium capitalize">{category}</span>
+            <div key={category} className="flex items-center justify-between p-2 rounded-lg bg-gray-50 dark:bg-gray-800">
+              <span className="text-sm font-medium capitalize text-gray-900 dark:text-gray-100">{category}</span>
               <Badge variant="secondary" className={getCategoryColor(category)}>
                 {counts.enabled}/{counts.total}
               </Badge>
@@ -230,19 +245,19 @@ export function QuickSettings() {
             const isEnabled = settings[item.id as keyof typeof settings]
             
             return (
-              <div key={item.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors">
+              <div key={item.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                 <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-full ${isEnabled ? 'bg-green-100' : 'bg-gray-100'}`}>
-                    <ItemIcon className={`h-4 w-4 ${isEnabled ? 'text-green-600' : 'text-gray-400'}`} />
+                  <div className={`p-2 rounded-full ${isEnabled ? 'bg-green-100 dark:bg-green-900' : 'bg-gray-100 dark:bg-gray-700'}`}>
+                    <ItemIcon className={`h-4 w-4 ${isEnabled ? 'text-green-600 dark:text-green-400' : 'text-gray-400 dark:text-gray-500'}`} />
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <p className="font-medium text-gray-900">{item.label}</p>
+                      <p className="font-medium text-gray-900 dark:text-gray-100">{item.label}</p>
                       <Badge variant="outline" className={`text-xs ${getCategoryColor(item.category)}`}>
                         {item.category}
                       </Badge>
                     </div>
-                    <p className="text-sm text-gray-600">{item.description}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">{item.description}</p>
                   </div>
                 </div>
                 

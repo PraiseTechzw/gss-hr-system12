@@ -8,20 +8,16 @@ import {
   Building, 
   Bell, 
   Shield, 
-  Palette, 
   Database, 
-  Globe,
-  Key,
-  Mail,
-  Smartphone,
   Monitor,
   HardDrive,
-  Wifi,
   Lock,
   UserCheck,
   FileText,
-  Zap
-} from "lucide-react"
+  Zap,
+  RefreshCw,
+  Save,
+  ChevronRight} from "lucide-react"
 import Link from "next/link"
 import { SettingsOverview } from "@/components/settings/settings-overview"
 import { SystemStatus } from "@/components/settings/system-status"
@@ -115,40 +111,46 @@ export default async function SettingsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+      {/* Enhanced Header */}
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
-          <p className="mt-1 text-gray-500">Manage system configuration and preferences</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Settings & Configuration</h1>
+          <p className="mt-1 text-gray-600 dark:text-gray-300">
+            Manage system configuration, user preferences, and security settings
+          </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline">
-            <Database className="mr-2 h-4 w-4" />
+          <Button variant="outline" className="gap-2">
+            <RefreshCw className="h-4 w-4" />
+            Refresh
+          </Button>
+          <Button variant="outline" className="gap-2">
+            <Database className="h-4 w-4" />
             Backup System
           </Button>
-          <Button className="bg-[#a2141e] hover:bg-[#8a1119]">
-            <FileText className="mr-2 h-4 w-4" />
-            Export Settings
+          <Button className="bg-[#a2141e] hover:bg-[#8a1119] gap-2">
+            <Save className="h-4 w-4" />
+            Save All Changes
           </Button>
         </div>
       </div>
 
       {/* System Overview Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
+        <Card className="hover:shadow-lg transition-shadow">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Active Users</p>
-                <p className="text-2xl font-bold text-gray-900">{systemSettings.activeUsers}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Active Users</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{systemSettings.activeUsers}</p>
               </div>
-              <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
-                <UserCheck className="h-6 w-6 text-green-600" />
+              <div className="h-12 w-12 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
+                <UserCheck className="h-6 w-6 text-green-600 dark:text-green-400" />
               </div>
             </div>
             <div className="mt-4 flex items-center text-sm">
               <Users className="h-4 w-4 text-green-500 mr-1" />
-              <span className="text-green-600 font-medium">Online now</span>
+              <span className="text-green-600 dark:text-green-400 font-medium">Online now</span>
             </div>
           </CardContent>
         </Card>
@@ -219,10 +221,13 @@ export default async function SettingsPage() {
       {/* System Status */}
       <SystemStatus settings={systemSettings} />
 
-      {/* Settings Categories */}
+      {/* Enhanced Settings Categories */}
       <Card>
         <CardHeader>
-          <CardTitle>Settings Categories</CardTitle>
+          <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
+            <Settings className="h-5 w-5" />
+            Settings Categories
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -230,23 +235,30 @@ export default async function SettingsPage() {
               const CategoryIcon = category.icon
               return (
                 <Link key={category.id} href={category.href}>
-                  <Card className="hover:shadow-md transition-shadow cursor-pointer h-full">
+                  <Card className="hover:shadow-lg transition-all duration-200 cursor-pointer h-full group border-l-4 border-l-transparent hover:border-l-blue-500">
                     <CardContent className="p-6">
                       <div className="flex items-start gap-4">
-                        <div className={`p-3 rounded-full ${category.bgColor}`}>
+                        <div className={`p-3 rounded-full ${category.bgColor} dark:opacity-80 group-hover:scale-110 transition-transform`}>
                           <CategoryIcon className={`h-6 w-6 ${category.color}`} />
                         </div>
                         <div className="flex-1">
-                          <h3 className="font-semibold text-gray-900 mb-2">{category.title}</h3>
-                          <p className="text-sm text-gray-600 mb-3">{category.description}</p>
+                          <div className="flex items-center justify-between mb-2">
+                            <h3 className="font-semibold text-gray-900 dark:text-gray-100 group-hover:text-blue-600 transition-colors">
+                              {category.title}
+                            </h3>
+                            <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-blue-600 transition-colors" />
+                          </div>
+                          <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">{category.description}</p>
                           <div className="space-y-1">
                             {category.items.slice(0, 3).map((item, index) => (
-                              <div key={index} className="text-xs text-gray-500">
-                                • {item}
+                              <div key={index} className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                                <div className="w-1 h-1 bg-gray-400 rounded-full" />
+                                {item}
                               </div>
                             ))}
                             {category.items.length > 3 && (
-                              <div className="text-xs text-gray-400">
+                              <div className="text-xs text-gray-400 dark:text-gray-500 flex items-center gap-1">
+                                <div className="w-1 h-1 bg-gray-400 rounded-full" />
                                 +{category.items.length - 3} more
                               </div>
                             )}
