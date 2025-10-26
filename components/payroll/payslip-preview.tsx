@@ -23,9 +23,9 @@ export function PayslipPreview({ payslipData, isOpen, onClose, onPrint, onDownlo
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-screen h-screen max-w-none max-h-none overflow-y-auto p-0">
-        <div className="space-y-6">
-          <div className="flex items-center justify-between p-4">
+      <DialogContent className="fixed inset-0 w-screen h-screen max-w-none max-h-none overflow-y-auto p-0 m-0 z-50">
+        <div className="w-full h-full bg-white">
+          <div className="flex items-center justify-between p-4 bg-white border-b sticky top-0 z-10">
             <Button variant="ghost" size="sm" onClick={onClose}>
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back
@@ -37,8 +37,8 @@ export function PayslipPreview({ payslipData, isOpen, onClose, onPrint, onDownlo
           </div>
 
           {/* Professional Payslip */}
-          <Card className="mx-auto max-w-5xl print:shadow-none print:border-none">
-            <CardContent className="p-0">
+          <div className="w-full">
+            <div className="w-full">
               {/* Header */}
               <div className="bg-gray-800 text-white p-6 text-center">
                 <div className="flex items-center justify-center mb-4">
@@ -190,8 +190,8 @@ export function PayslipPreview({ payslipData, isOpen, onClose, onPrint, onDownlo
                   </table>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
