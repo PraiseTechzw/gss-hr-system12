@@ -169,7 +169,7 @@ export async function POST(request: NextRequest) {
 async function generatePayslipPDF(payslipData: any): Promise<Buffer> {
   console.log('🔧 [PDF GENERATION] Creating payslip PDF...')
   
-  // Create a proper HTML payslip that can be converted to PDF
+  // Create a proper HTML payslip matching the exact design from the existing payslip page
   const htmlContent = `
     <!DOCTYPE html>
     <html>
@@ -180,221 +180,231 @@ async function generatePayslipPDF(payslipData: any): Promise<Buffer> {
         body { 
           font-family: Arial, sans-serif; 
           margin: 0; 
-          padding: 20px; 
+          padding: 0; 
           background: white;
           color: #333;
         }
-        .header { 
-          text-align: center; 
-          border-bottom: 3px solid #a2141e; 
-          padding-bottom: 20px; 
-          margin-bottom: 30px;
+        .payslip-container {
+          max-width: 5xl;
+          margin: 0 auto;
+          background: white;
         }
-        .company-name { 
-          font-size: 24px; 
-          font-weight: bold; 
-          color: #a2141e; 
-          margin-bottom: 10px;
+        .company-header {
+          background: #374151;
+          color: white;
+          padding: 24px;
+          text-align: center;
         }
-        .company-details { 
-          font-size: 14px; 
-          color: #666; 
+        .company-header .logo-section {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 16px;
         }
-        .payslip-title { 
-          font-size: 20px; 
-          font-weight: bold; 
-          text-align: center; 
-          margin: 20px 0; 
-          color: #a2141e;
+        .company-header img {
+          height: 64px;
+          width: 64px;
+          margin-right: 16px;
         }
-        .employee-section, .earnings-section, .deductions-section { 
-          margin: 20px 0; 
-          padding: 15px; 
-          border: 1px solid #ddd; 
-          border-radius: 5px;
+        .company-header h1 {
+          font-size: 24px;
+          font-weight: bold;
+          margin: 0;
         }
-        .section-title { 
-          font-size: 16px; 
-          font-weight: bold; 
-          color: #a2141e; 
-          margin-bottom: 15px; 
-          border-bottom: 1px solid #eee; 
-          padding-bottom: 5px;
+        .company-header p {
+          font-size: 14px;
+          color: #d1d5db;
+          margin: 0;
         }
-        .employee-grid { 
-          display: grid; 
-          grid-template-columns: 1fr 1fr; 
-          gap: 15px; 
+        .payslip-content {
+          padding: 32px;
         }
-        .employee-item { 
-          margin-bottom: 8px; 
+        .employee-table, .earnings-table, .net-pay-table {
+          width: 100%;
+          border-collapse: collapse;
+          border: 1px solid #9ca3af;
+          font-size: 14px;
+          margin-bottom: 24px;
         }
-        .employee-label { 
-          font-weight: bold; 
-          color: #666; 
+        .employee-table td, .earnings-table td, .earnings-table th, .net-pay-table td {
+          border: 1px solid #9ca3af;
+          padding: 8px 12px;
         }
-        .earnings-table, .deductions-table { 
-          width: 100%; 
-          border-collapse: collapse; 
-          margin-top: 10px;
+        .employee-table td:first-child, .earnings-table th:first-child {
+          background: #f3f4f6;
+          font-weight: 500;
         }
-        .earnings-table th, .deductions-table th { 
-          background: #f5f5f5; 
-          padding: 10px; 
-          text-align: left; 
-          border: 1px solid #ddd;
+        .earnings-table th {
+          background: #f3f4f6;
+          font-weight: 500;
         }
-        .earnings-table td, .deductions-table td { 
-          padding: 10px; 
-          border: 1px solid #ddd;
+        .earnings-table tr:last-child {
+          background: #f3f4f6;
+          font-weight: 500;
         }
-        .amount { 
-          text-align: right; 
-          font-weight: bold; 
+        .net-pay-table tr:first-child {
+          background: #374151;
+          color: white;
         }
-        .total-row { 
-          background: #f9f9f9; 
+        .net-pay-table tr:first-child td {
+          font-weight: 500;
+        }
+        .net-pay-table tr:last-child td:last-child {
           font-weight: bold;
         }
-        .net-pay { 
-          background: #e8f5e8; 
-          color: #2d5a2d; 
-          font-size: 18px; 
-          font-weight: bold;
+        .text-right {
+          text-align: right;
         }
-        .footer { 
-          margin-top: 30px; 
-          text-align: center; 
-          font-size: 12px; 
-          color: #666; 
-          border-top: 1px solid #eee; 
-          padding-top: 15px;
+        .text-center {
+          text-align: center;
         }
         @media print {
-          body { margin: 0; padding: 15px; }
-          .no-print { display: none; }
+          body { margin: 0; padding: 0; }
+          .payslip-container { box-shadow: none; border: none; }
         }
       </style>
     </head>
     <body>
-      <div class="header">
-        <div class="company-name">${payslipData.company.name}</div>
-        <div class="company-details">
-          ${payslipData.company.address}<br>
-          Phone: ${payslipData.company.phone} | Email: ${payslipData.company.email}
+      <div class="payslip-container">
+        <!-- Header -->
+        <div class="company-header">
+          <div class="logo-section">
+            <img src="/logo.png" alt="Genius Security Logo" />
+            <h1>GENIUS SECURITY (PVT) LTD</h1>
+          </div>
+          <p>For Genuine Security Solutions</p>
         </div>
-      </div>
-      
-      <div class="payslip-title">PAYSLIP FOR PERIOD: ${payslipData.payroll.period}</div>
-      
-      <div class="employee-section">
-        <div class="section-title">EMPLOYEE DETAILS</div>
-        <div class="employee-grid">
-          <div class="employee-item">
-            <span class="employee-label">Employee Number:</span> ${payslipData.employee.number}
-          </div>
-          <div class="employee-item">
-            <span class="employee-label">Name:</span> ${payslipData.employee.name}
-          </div>
-          <div class="employee-item">
-            <span class="employee-label">Department:</span> ${payslipData.employee.department}
-          </div>
-          <div class="employee-item">
-            <span class="employee-label">Position:</span> ${payslipData.employee.position}
-          </div>
-          <div class="employee-item">
-            <span class="employee-label">Email:</span> ${payslipData.employee.email}
-          </div>
-          <div class="employee-item">
-            <span class="employee-label">Phone:</span> ${payslipData.employee.phone}
-          </div>
-          <div class="employee-item">
-            <span class="employee-label">ID Number:</span> ${payslipData.employee.idNumber}
-          </div>
-          <div class="employee-item">
-            <span class="employee-label">Employment Type:</span> ${payslipData.employee.employmentType}
-          </div>
+
+        <div class="payslip-content">
+          <!-- Employee Information Table -->
+          <table class="employee-table">
+            <tbody>
+              <tr>
+                <td style="width: 25%;">Employee Number</td>
+                <td style="width: 25%;">${payslipData.employee.number}</td>
+                <td style="width: 25%;">Pay Point</td>
+                <td style="width: 25%;">${payslipData.employee.city || 'N/A'}</td>
+              </tr>
+              <tr>
+                <td>Employee Name</td>
+                <td>${payslipData.employee.name}</td>
+                <td>Nostro Account Number</td>
+                <td>${payslipData.employee.accountNumber || '0000000000'}</td>
+              </tr>
+              <tr>
+                <td>Department</td>
+                <td>${payslipData.employee.department || 'Operations'}</td>
+                <td>Bank</td>
+                <td>${payslipData.employee.bank || 'POHBS BANK'}</td>
+              </tr>
+              <tr>
+                <td>I.D. Number</td>
+                <td>${payslipData.employee.idNumber || 'N/A'}</td>
+                <td>Employment Status</td>
+                <td>${payslipData.employee.employmentStatus || 'N/A'}</td>
+              </tr>
+              <tr>
+                <td>Position</td>
+                <td>${payslipData.employee.position}</td>
+                <td>ZWL Account Number</td>
+                <td>${payslipData.employee.zwlAccountNumber || 'N/A'}</td>
+              </tr>
+              <tr>
+                <td>Branch Code</td>
+                <td>${payslipData.employee.branchCode || 'N/A'}</td>
+                <td>Bank</td>
+                <td>${payslipData.employee.bank || 'N/A'}</td>
+              </tr>
+              <tr>
+                <td>Employment Type</td>
+                <td>Contract</td>
+                <td></td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- Earnings and Deductions Table -->
+          <table class="earnings-table">
+            <thead>
+              <tr>
+                <th style="width: 20%;">EARNINGS</th>
+                <th style="width: 15%;" class="text-right">USD</th>
+                <th style="width: 15%;" class="text-right">ZWL</th>
+                <th style="width: 20%;">DEDUCTIONS</th>
+                <th style="width: 15%;" class="text-right">USD</th>
+                <th style="width: 15%;" class="text-right">ZWL</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${(() => {
+                const fx = Number(payslipData.payroll.exchangeRate || 0)
+                const toZwl = (usd: number) => (fx > 0 ? usd * fx : 0)
+                const usdBasic = Number(payslipData.payroll.basicSalary || 0)
+                const usdTransport = Number(payslipData.payroll.transportAllowance || 0)
+                const usdOtherAllowances = Math.max(0, Number(payslipData.payroll.allowances || 0) - usdTransport)
+                const usdNssa = Number(payslipData.payroll.nssaDeduction || 0)
+                const usdPayee = Number(payslipData.payroll.payeeDeduction || 0)
+                const usdOtherDeductions = Math.max(0, Number(payslipData.payroll.deductions || 0) - usdNssa - usdPayee)
+                const usdGross = Number(payslipData.payroll.grossSalary || 0)
+                const usdTotalDeductions = Number(payslipData.payroll.totalDeductions || 0)
+
+                return `
+                  <tr>
+                    <td>Basic</td>
+                    <td class="text-right">${usdBasic.toFixed(2)}</td>
+                    <td class="text-right">${toZwl(usdBasic).toFixed(2)}</td>
+                    <td>NSSA</td>
+                    <td class="text-right">-${usdNssa.toFixed(2)}</td>
+                    <td class="text-right">-${toZwl(usdNssa).toFixed(2)}</td>
+                  </tr>
+                  <tr>
+                    <td>Transport Allowance</td>
+                    <td class="text-right">${usdTransport.toFixed(2)}</td>
+                    <td class="text-right">${toZwl(usdTransport).toFixed(2)}</td>
+                    <td>PAYEE</td>
+                    <td class="text-right">-${usdPayee.toFixed(2)}</td>
+                    <td class="text-right">-${toZwl(usdPayee).toFixed(2)}</td>
+                  </tr>
+                  ${(usdOtherAllowances > 0 || usdOtherDeductions > 0) ? `
+                    <tr>
+                      <td>Other Allowances</td>
+                      <td class="text-right">${usdOtherAllowances.toFixed(2)}</td>
+                      <td class="text-right">${toZwl(usdOtherAllowances).toFixed(2)}</td>
+                      <td>Other Deductions</td>
+                      <td class="text-right">-${usdOtherDeductions.toFixed(2)}</td>
+                      <td class="text-right">-${toZwl(usdOtherDeductions).toFixed(2)}</td>
+                    </tr>
+                  ` : ''}
+                  <tr>
+                    <td>GROSS</td>
+                    <td class="text-right">${usdGross.toFixed(2)}</td>
+                    <td class="text-right">${toZwl(usdGross).toFixed(2)}</td>
+                    <td>TOTAL DEDUCTIONS</td>
+                    <td class="text-right">${usdTotalDeductions.toFixed(2)}</td>
+                    <td class="text-right">${toZwl(usdTotalDeductions).toFixed(2)}</td>
+                  </tr>
+                `
+              })()}
+            </tbody>
+          </table>
+
+          <!-- Net Pay Table -->
+          <table class="net-pay-table">
+            <tbody>
+              <tr>
+                <td class="text-center">Net Paid</td>
+                <td class="text-right">USD</td>
+                <td class="text-right">ZWL</td>
+              </tr>
+              <tr>
+                <td></td>
+                <td class="text-right">${Number(payslipData.payroll.netSalary || 0).toFixed(2)}</td>
+                <td class="text-right">${(Number(payslipData.payroll.exchangeRate || 0) > 0 ? (Number(payslipData.payroll.netSalary || 0) * Number(payslipData.payroll.exchangeRate)).toFixed(2) : '—')}</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-      </div>
-      
-      <div class="earnings-section">
-        <div class="section-title">EARNINGS</div>
-        <table class="earnings-table">
-          <tr>
-            <th>Description</th>
-            <th class="amount">Amount (USD)</th>
-          </tr>
-          <tr>
-            <td>Basic Salary</td>
-            <td class="amount">$${payslipData.payroll.basicSalary.toFixed(2)}</td>
-          </tr>
-          <tr>
-            <td>Allowances</td>
-            <td class="amount">$${payslipData.payroll.allowances.toFixed(2)}</td>
-          </tr>
-          <tr>
-            <td>Transport Allowance</td>
-            <td class="amount">$${payslipData.payroll.transportAllowance.toFixed(2)}</td>
-          </tr>
-          <tr>
-            <td>Overtime Pay</td>
-            <td class="amount">$${payslipData.payroll.overtimePay.toFixed(2)}</td>
-          </tr>
-          <tr class="total-row">
-            <td><strong>GROSS SALARY</strong></td>
-            <td class="amount"><strong>$${payslipData.payroll.grossSalary.toFixed(2)}</strong></td>
-          </tr>
-        </table>
-      </div>
-      
-      <div class="deductions-section">
-        <div class="section-title">DEDUCTIONS</div>
-        <table class="deductions-table">
-          <tr>
-            <th>Description</th>
-            <th class="amount">Amount (USD)</th>
-          </tr>
-          <tr>
-            <td>NSSA Deduction</td>
-            <td class="amount">$${payslipData.payroll.nssaDeduction.toFixed(2)}</td>
-          </tr>
-          <tr>
-            <td>PAYE Deduction</td>
-            <td class="amount">$${payslipData.payroll.payeeDeduction.toFixed(2)}</td>
-          </tr>
-          <tr>
-            <td>Other Deductions</td>
-            <td class="amount">$${payslipData.payroll.deductions.toFixed(2)}</td>
-          </tr>
-          <tr class="total-row">
-            <td><strong>TOTAL DEDUCTIONS</strong></td>
-            <td class="amount"><strong>$${payslipData.payroll.totalDeductions.toFixed(2)}</strong></td>
-          </tr>
-        </table>
-      </div>
-      
-      <div style="margin: 20px 0; padding: 15px; background: #e8f5e8; border-radius: 5px;">
-        <div style="text-align: center; font-size: 20px; font-weight: bold; color: #2d5a2d;">
-          NET PAY: $${payslipData.payroll.netSalary.toFixed(2)}
-        </div>
-      </div>
-      
-      <div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px;">
-        <div class="section-title">PAYMENT DETAILS</div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-          <div><strong>Payment Status:</strong> ${payslipData.payroll.paymentStatus.toUpperCase()}</div>
-          <div><strong>Payment Date:</strong> ${payslipData.payroll.paymentDate || 'Pending'}</div>
-          <div><strong>Payment Method:</strong> ${payslipData.payroll.paymentMethod || 'Bank Transfer'}</div>
-          <div><strong>Exchange Rate:</strong> ${payslipData.payroll.exchangeRate} ZWL per USD</div>
-          <div><strong>Days Worked:</strong> ${payslipData.payroll.daysWorked}</div>
-          <div><strong>Days Absent:</strong> ${payslipData.payroll.daysAbsent}</div>
-        </div>
-        ${payslipData.notes ? `<div style="margin-top: 10px;"><strong>Notes:</strong> ${payslipData.notes}</div>` : ''}
-      </div>
-      
-      <div class="footer">
-        Generated on: ${new Date(payslipData.generatedAt).toLocaleDateString()}<br>
-        This is a computer-generated payslip.
       </div>
     </body>
     </html>

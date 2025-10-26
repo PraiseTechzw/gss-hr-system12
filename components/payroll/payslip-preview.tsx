@@ -1,260 +1,199 @@
 "use client"
 
 import React from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Print, Download, FileText, User, DollarSign, Calendar, Building, ArrowLeft } from "lucide-react"
+import { Print, Download, ArrowLeft } from "lucide-react"
+import { Card, CardContent } from "@/components/ui/card"
 
 interface PayslipPreviewProps {
   payslipData: any
+  isOpen: boolean
+  onClose: () => void
   onPrint?: () => void
   onDownload?: () => void
 }
 
-export function PayslipPreview({ payslipData, onPrint, onDownload }: PayslipPreviewProps) {
+export function PayslipPreview({ payslipData, isOpen, onClose, onPrint, onDownload }: PayslipPreviewProps) {
   if (!payslipData) {
-    return (
-      <Card>
-        <CardContent className="p-6 text-center">
-          <FileText className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-          <p className="text-gray-500">No payslip data to preview</p>
-        </CardContent>
-      </Card>
-    )
+    return null
   }
 
   const { company, employee, payroll } = payslipData
 
   return (
-    <div className="bg-white min-h-screen">
-      {/* Top Navigation Bar */}
-      <div className="flex items-center justify-between p-4 bg-white border-b">
-        <div className="flex items-center gap-2">
-          <ArrowLeft className="h-4 w-4" />
-          <span className="text-black">Back</span>
-        </div>
-        <Button 
-          onClick={onPrint}
-          className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"
-        >
-          <Download className="h-4 w-4" />
-          Print / Download
-        </Button>
-      </div>
-
-      {/* Company Header */}
-      <div className="bg-blue-900 text-white p-6">
-        <div className="flex items-center gap-4">
-          {/* Company Logo */}
-          <div className="w-16 h-16 bg-white rounded-lg flex items-center justify-center">
-            <div className="w-12 h-12 bg-gradient-to-br from-red-500 via-blue-500 to-green-500 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">G</span>
-            </div>
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold">{company.name}</h1>
-            <p className="text-blue-200">For Genuine Security Solutions</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Employee Details Table */}
-      <div className="p-6">
-        <div className="bg-white border border-gray-300 rounded-lg overflow-hidden">
-          <div className="grid grid-cols-2">
-            {/* Left Column */}
-            <div className="border-r border-gray-300">
-              <div className="p-4 border-b border-gray-300">
-                <div className="flex justify-between">
-                  <span className="font-semibold text-gray-700">Employee Number:</span>
-                  <span className="text-gray-900">{employee.number}</span>
-                </div>
-              </div>
-              <div className="p-4 border-b border-gray-300">
-                <div className="flex justify-between">
-                  <span className="font-semibold text-gray-700">Employee Name:</span>
-                  <span className="text-gray-900">{employee.name}</span>
-                </div>
-              </div>
-              <div className="p-4 border-b border-gray-300">
-                <div className="flex justify-between">
-                  <span className="font-semibold text-gray-700">Department:</span>
-                  <span className="text-gray-900">{employee.department}</span>
-                </div>
-              </div>
-              <div className="p-4 border-b border-gray-300">
-                <div className="flex justify-between">
-                  <span className="font-semibold text-gray-700">I.D. Number:</span>
-                  <span className="text-gray-900">{employee.idNumber}</span>
-                </div>
-              </div>
-              <div className="p-4 border-b border-gray-300">
-                <div className="flex justify-between">
-                  <span className="font-semibold text-gray-700">Position:</span>
-                  <span className="text-gray-900">{employee.position}</span>
-                </div>
-              </div>
-              <div className="p-4 border-b border-gray-300">
-                <div className="flex justify-between">
-                  <span className="font-semibold text-gray-700">Branch Code:</span>
-                  <span className="text-gray-900">1234</span>
-                </div>
-              </div>
-              <div className="p-4">
-                <div className="flex justify-between">
-                  <span className="font-semibold text-gray-700">Employment Type:</span>
-                  <span className="text-gray-900">{employee.employmentType}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Column */}
-            <div>
-              <div className="p-4 border-b border-gray-300">
-                <div className="flex justify-between">
-                  <span className="font-semibold text-gray-700">Pay Point:</span>
-                  <span className="text-gray-900">N/A</span>
-                </div>
-              </div>
-              <div className="p-4 border-b border-gray-300">
-                <div className="flex justify-between">
-                  <span className="font-semibold text-gray-700">Nostro Account Number:</span>
-                  <span className="text-gray-900">{employee.accountNumber}</span>
-                </div>
-              </div>
-              <div className="p-4 border-b border-gray-300">
-                <div className="flex justify-between">
-                  <span className="font-semibold text-gray-700">Bank:</span>
-                  <span className="text-gray-900">{employee.bank}</span>
-                </div>
-              </div>
-              <div className="p-4 border-b border-gray-300">
-                <div className="flex justify-between">
-                  <span className="font-semibold text-gray-700">Employment Status:</span>
-                  <span className="text-gray-900">N/A</span>
-                </div>
-              </div>
-              <div className="p-4 border-b border-gray-300">
-                <div className="flex justify-between">
-                  <span className="font-semibold text-gray-700">ZWL Account Number:</span>
-                  <span className="text-gray-900">{employee.accountNumber}</span>
-                </div>
-              </div>
-              <div className="p-4">
-                <div className="flex justify-between">
-                  <span className="font-semibold text-gray-700">Bank:</span>
-                  <span className="text-gray-900">{employee.bank}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Earnings and Deductions Tables */}
-      <div className="p-6">
-        <div className="grid grid-cols-2 gap-6">
-          {/* Earnings Table */}
-          <div className="bg-white border border-gray-300 rounded-lg overflow-hidden">
-            <div className="bg-gray-100 p-3 border-b border-gray-300">
-              <h3 className="font-bold text-gray-800">EARNINGS</h3>
-            </div>
-            <div className="divide-y divide-gray-300">
-              <div className="p-3 flex justify-between items-center">
-                <span className="font-semibold text-gray-700">Basic:</span>
-                <div className="flex gap-4">
-                  <span className="text-right w-20">USD {payroll.basicSalary.toFixed(2)}</span>
-                  <span className="text-right w-20">ZWL {(payroll.basicSalary * payroll.exchangeRate).toFixed(2)}</span>
-                </div>
-              </div>
-              <div className="p-3 flex justify-between items-center">
-                <span className="font-semibold text-gray-700">Transport Allowance:</span>
-                <div className="flex gap-4">
-                  <span className="text-right w-20">USD {payroll.transportAllowance.toFixed(2)}</span>
-                  <span className="text-right w-20">ZWL {(payroll.transportAllowance * payroll.exchangeRate).toFixed(2)}</span>
-                </div>
-              </div>
-              <div className="p-3 flex justify-between items-center">
-                <span className="font-semibold text-gray-700">Other Allowances:</span>
-                <div className="flex gap-4">
-                  <span className="text-right w-20">USD {payroll.allowances.toFixed(2)}</span>
-                  <span className="text-right w-20">ZWL {(payroll.allowances * payroll.exchangeRate).toFixed(2)}</span>
-                </div>
-              </div>
-              <div className="p-3 bg-gray-50 border-t-2 border-gray-400 flex justify-between items-center">
-                <span className="font-bold text-gray-800">GROSS:</span>
-                <div className="flex gap-4">
-                  <span className="text-right w-20 font-bold">USD {payroll.grossSalary.toFixed(2)}</span>
-                  <span className="text-right w-20 font-bold">ZWL {(payroll.grossSalary * payroll.exchangeRate).toFixed(2)}</span>
-                </div>
-              </div>
-            </div>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-7xl w-[95vw] max-h-[90vh] overflow-y-auto p-0">
+        <div className="space-y-6">
+          <div className="flex items-center justify-between p-4">
+            <Button variant="ghost" size="sm" onClick={onClose}>
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back
+            </Button>
+            <Button onClick={onPrint} className="bg-[#a2141e] hover:bg-[#8a1119]">
+              <Download className="mr-2 h-4 w-4" />
+              Print / Download
+            </Button>
           </div>
 
-          {/* Deductions Table */}
-          <div className="bg-white border border-gray-300 rounded-lg overflow-hidden">
-            <div className="bg-gray-100 p-3 border-b border-gray-300">
-              <h3 className="font-bold text-gray-800">DEDUCTIONS</h3>
-            </div>
-            <div className="divide-y divide-gray-300">
-              <div className="p-3 flex justify-between items-center">
-                <span className="font-semibold text-gray-700">NSSA:</span>
-                <div className="flex gap-4">
-                  <span className="text-right w-20">USD -{payroll.nssaDeduction.toFixed(2)}</span>
-                  <span className="text-right w-20">ZWL -{(payroll.nssaDeduction * payroll.exchangeRate).toFixed(2)}</span>
+          {/* Professional Payslip */}
+          <Card className="mx-auto max-w-5xl print:shadow-none print:border-none">
+            <CardContent className="p-0">
+              {/* Header */}
+              <div className="bg-gray-800 text-white p-6 text-center">
+                <div className="flex items-center justify-center mb-4">
+                  <img 
+                    src="/logo.png" 
+                    alt="Genius Security Logo" 
+                    className="h-16 w-16 mr-4"
+                  />
+                  <h1 className="text-2xl font-bold">GENIUS SECURITY (PVT) LTD</h1>
                 </div>
+                <p className="text-sm text-gray-300">For Genuine Security Solutions</p>
               </div>
-              <div className="p-3 flex justify-between items-center">
-                <span className="font-semibold text-gray-700">PAYEE:</span>
-                <div className="flex gap-4">
-                  <span className="text-right w-20">USD -{payroll.payeeDeduction.toFixed(2)}</span>
-                  <span className="text-right w-20">ZWL -{(payroll.payeeDeduction * payroll.exchangeRate).toFixed(2)}</span>
-                </div>
-              </div>
-              <div className="p-3 flex justify-between items-center">
-                <span className="font-semibold text-gray-700">Other Deductions:</span>
-                <div className="flex gap-4">
-                  <span className="text-right w-20">USD -{payroll.deductions.toFixed(2)}</span>
-                  <span className="text-right w-20">ZWL -{(payroll.deductions * payroll.exchangeRate).toFixed(2)}</span>
-                </div>
-              </div>
-              <div className="p-3 bg-gray-50 border-t-2 border-gray-400 flex justify-between items-center">
-                <span className="font-bold text-gray-800">TOTAL DEDUCTIONS:</span>
-                <div className="flex gap-4">
-                  <span className="text-right w-20 font-bold">USD {payroll.totalDeductions.toFixed(2)}</span>
-                  <span className="text-right w-20 font-bold">ZWL {(payroll.totalDeductions * payroll.exchangeRate).toFixed(2)}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      {/* Net Pay Section */}
-      <div className="p-6">
-        <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
-          <h3 className="text-2xl font-bold text-green-600 mb-2">NET PAY</h3>
-          <div className="flex justify-center gap-8">
-            <div>
-              <p className="text-sm text-gray-600">USD</p>
-              <p className="text-3xl font-bold text-green-700">${payroll.netSalary.toFixed(2)}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">ZWL</p>
-              <p className="text-3xl font-bold text-green-700">ZWL {(payroll.netSalary * payroll.exchangeRate).toFixed(2)}</p>
-            </div>
-          </div>
-        </div>
-      </div>
+              <div className="p-8">
+                {/* Employee Information Table */}
+                <div className="mb-6">
+                  <table className="w-full border-collapse border border-gray-400 text-sm">
+                    <tbody>
+                      <tr>
+                        <td className="border border-gray-400 bg-gray-100 px-3 py-2 font-medium w-1/4">Employee Number</td>
+                        <td className="border border-gray-400 px-3 py-2 w-1/4">{employee.number}</td>
+                        <td className="border border-gray-400 bg-gray-100 px-3 py-2 font-medium w-1/4">Pay Point</td>
+                        <td className="border border-gray-400 px-3 py-2 w-1/4">{employee.city || 'N/A'}</td>
+                      </tr>
+                      <tr>
+                        <td className="border border-gray-400 bg-gray-100 px-3 py-2 font-medium">Employee Name</td>
+                        <td className="border border-gray-400 px-3 py-2">{employee.name}</td>
+                        <td className="border border-gray-400 bg-gray-100 px-3 py-2 font-medium">Nostro Account Number</td>
+                        <td className="border border-gray-400 px-3 py-2">{employee.accountNumber || '0000000000'}</td>
+                      </tr>
+                      <tr>
+                        <td className="border border-gray-400 bg-gray-100 px-3 py-2 font-medium">Department</td>
+                        <td className="border border-gray-400 px-3 py-2">{employee.department || 'Operations'}</td>
+                        <td className="border border-gray-400 bg-gray-100 px-3 py-2 font-medium">Bank</td>
+                        <td className="border border-gray-400 px-3 py-2">{employee.bank || 'POHBS BANK'}</td>
+                      </tr>
+                      <tr>
+                        <td className="border border-gray-400 bg-gray-100 px-3 py-2 font-medium">I.D. Number</td>
+                        <td className="border border-gray-400 px-3 py-2">{employee.idNumber || 'N/A'}</td>
+                        <td className="border border-gray-400 bg-gray-100 px-3 py-2 font-medium">Employment Status</td>
+                        <td className="border border-gray-400 px-3 py-2">{employee.employmentStatus || 'N/A'}</td>
+                      </tr>
+                      <tr>
+                        <td className="border border-gray-400 bg-gray-100 px-3 py-2 font-medium">Position</td>
+                        <td className="border border-gray-400 px-3 py-2">{employee.position}</td>
+                        <td className="border border-gray-400 bg-gray-100 px-3 py-2 font-medium">ZWL Account Number</td>
+                        <td className="border border-gray-400 px-3 py-2">{employee.zwlAccountNumber || 'N/A'}</td>
+                      </tr>
+                      <tr>
+                        <td className="border border-gray-400 bg-gray-100 px-3 py-2 font-medium">Branch Code</td>
+                        <td className="border border-gray-400 px-3 py-2">{employee.branchCode || 'N/A'}</td>
+                        <td className="border border-gray-400 bg-gray-100 px-3 py-2 font-medium">Bank</td>
+                        <td className="border border-gray-400 px-3 py-2">{employee.bank || 'N/A'}</td>
+                      </tr>
+                      <tr>
+                        <td className="border border-gray-400 bg-gray-100 px-3 py-2 font-medium">Employment Type</td>
+                        <td className="border border-gray-400 px-3 py-2">Contract</td>
+                        <td className="border border-gray-400 bg-gray-100 px-3 py-2 font-medium"></td>
+                        <td className="border border-gray-400 px-3 py-2"></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
 
-      {/* Online Status Indicator */}
-      <div className="fixed bottom-4 right-4">
-        <div className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium flex items-center gap-2">
-          <div className="w-2 h-2 bg-white rounded-full"></div>
-          Online
+                {/* Earnings and Deductions Table */}
+                <div className="mb-6">
+                  <table className="w-full border-collapse border border-gray-400 text-sm">
+                    <thead>
+                      <tr className="bg-gray-100">
+                        <th className="border border-gray-400 px-3 py-2 text-left font-medium">EARNINGS</th>
+                        <th className="border border-gray-400 px-3 py-2 text-right font-medium">USD</th>
+                        <th className="border border-gray-400 px-3 py-2 text-right font-medium">ZWL</th>
+                        <th className="border border-gray-400 px-3 py-2 text-left font-medium">DEDUCTIONS</th>
+                        <th className="border border-gray-400 px-3 py-2 text-right font-medium">USD</th>
+                        <th className="border border-gray-400 px-3 py-2 text-right font-medium">ZWL</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(() => {
+                        const fx = Number(payroll.exchangeRate || 0)
+                        const toZwl = (usd: number) => (fx > 0 ? usd * fx : 0)
+                        const usdBasic = Number(payroll.basicSalary || 0)
+                        const usdTransport = Number(payroll.transportAllowance || 0)
+                        const usdOtherAllowances = Math.max(0, Number(payroll.allowances || 0) - usdTransport)
+                        const usdNssa = Number(payroll.nssaDeduction || 0)
+                        const usdPayee = Number(payroll.payeeDeduction || 0)
+                        const usdOtherDeductions = Math.max(0, Number(payroll.deductions || 0) - usdNssa - usdPayee)
+                        const usdGross = Number(payroll.grossSalary || 0)
+                        const usdTotalDeductions = Number(payroll.totalDeductions || 0)
+
+                        return (
+                          <>
+                            <tr>
+                              <td className="border border-gray-400 px-3 py-2">Basic</td>
+                              <td className="border border-gray-400 px-3 py-2 text-right">{usdBasic.toFixed(2)}</td>
+                              <td className="border border-gray-400 px-3 py-2 text-right">{toZwl(usdBasic).toFixed(2)}</td>
+                              <td className="border border-gray-400 px-3 py-2">NSSA</td>
+                              <td className="border border-gray-400 px-3 py-2 text-right">-{usdNssa.toFixed(2)}</td>
+                              <td className="border border-gray-400 px-3 py-2 text-right">-{toZwl(usdNssa).toFixed(2)}</td>
+                            </tr>
+                            <tr>
+                              <td className="border border-gray-400 px-3 py-2">Transport Allowance</td>
+                              <td className="border border-gray-400 px-3 py-2 text-right">{usdTransport.toFixed(2)}</td>
+                              <td className="border border-gray-400 px-3 py-2 text-right">{toZwl(usdTransport).toFixed(2)}</td>
+                              <td className="border border-gray-400 px-3 py-2">PAYEE</td>
+                              <td className="border border-gray-400 px-3 py-2 text-right">-{usdPayee.toFixed(2)}</td>
+                              <td className="border border-gray-400 px-3 py-2 text-right">-{toZwl(usdPayee).toFixed(2)}</td>
+                            </tr>
+                            {(usdOtherAllowances > 0 || usdOtherDeductions > 0) && (
+                              <tr>
+                                <td className="border border-gray-400 px-3 py-2">Other Allowances</td>
+                                <td className="border border-gray-400 px-3 py-2 text-right">{usdOtherAllowances.toFixed(2)}</td>
+                                <td className="border border-gray-400 px-3 py-2 text-right">{toZwl(usdOtherAllowances).toFixed(2)}</td>
+                                <td className="border border-gray-400 px-3 py-2">Other Deductions</td>
+                                <td className="border border-gray-400 px-3 py-2 text-right">-{usdOtherDeductions.toFixed(2)}</td>
+                                <td className="border border-gray-400 px-3 py-2 text-right">-{toZwl(usdOtherDeductions).toFixed(2)}</td>
+                              </tr>
+                            )}
+                            <tr className="bg-gray-100 font-medium">
+                              <td className="border border-gray-400 px-3 py-2">GROSS</td>
+                              <td className="border border-gray-400 px-3 py-2 text-right">{usdGross.toFixed(2)}</td>
+                              <td className="border border-gray-400 px-3 py-2 text-right">{toZwl(usdGross).toFixed(2)}</td>
+                              <td className="border border-gray-400 px-3 py-2">TOTAL DEDUCTIONS</td>
+                              <td className="border border-gray-400 px-3 py-2 text-right">{usdTotalDeductions.toFixed(2)}</td>
+                              <td className="border border-gray-400 px-3 py-2 text-right">{toZwl(usdTotalDeductions).toFixed(2)}</td>
+                            </tr>
+                          </>
+                        )
+                      })()}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Net Pay Table */}
+                <div className="mb-6">
+                  <table className="w-full border-collapse border border-gray-400 text-sm">
+                    <tbody>
+                      <tr className="bg-gray-800 text-white">
+                        <td className="border border-gray-400 px-3 py-2 font-medium text-center">Net Paid</td>
+                        <td className="border border-gray-400 px-3 py-2 text-right font-medium">USD</td>
+                        <td className="border border-gray-400 px-3 py-2 text-right font-medium">ZWL</td>
+                      </tr>
+                      <tr>
+                        <td className="border border-gray-400 px-3 py-2"></td>
+                        <td className="border border-gray-400 px-3 py-2 text-right font-bold">{Number(payroll.netSalary || 0).toFixed(2)}</td>
+                        <td className="border border-gray-400 px-3 py-2 text-right font-bold">{(Number(payroll.exchangeRate || 0) > 0 ? (Number(payroll.netSalary || 0) * Number(payroll.exchangeRate)).toFixed(2) : '—')}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   )
 }
