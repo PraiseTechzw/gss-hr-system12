@@ -6,8 +6,9 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { MapPin, Navigation, Users, Building, Clock, DollarSign, Search, Filter } from "lucide-react"
+import { MapPin, Navigation, Users, Building, Clock, DollarSign, Search, Filter, Eye, Maximize2, Minimize2, Layers, Target } from "lucide-react"
 import Link from "next/link"
+import { formatShiftTimesForDisplay, getShiftSummary } from "@/components/ui/shift-time-picker"
 
 type Deployment = {
   id: string

@@ -3,7 +3,7 @@
 import type React from "react"
 import { createClient } from "@/lib/supabase/client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
 // Supabase client removed
 import { toast } from "sonner"
@@ -243,7 +243,7 @@ export function DeploymentForm({
   }
 
   // Helper function to update form data
-  const updateFormData = (field: keyof DeploymentFormData, value: string) => {
+  const updateFormData = useCallback((field: keyof DeploymentFormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
     // Clear validation error for this field
     if (validationErrors[field]) {
@@ -253,7 +253,7 @@ export function DeploymentForm({
         return newErrors
       })
     }
-  }
+  }, [validationErrors])
 
   // Step progress
   const steps = [

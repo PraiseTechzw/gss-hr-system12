@@ -107,7 +107,7 @@ export function formatShiftTimesForDisplay(shiftTiming: string): string {
     }, {})
 
     return Object.entries(groupedByTime)
-      .map(([time, days]) => `${days.join(', ')}: ${time}`)
+      .map(([time, days]) => `${(days as string[]).join(', ')}: ${time}`)
       .join(' | ')
   } catch {
     // Fallback for simple format
@@ -143,6 +143,7 @@ export function ShiftTimePicker({
 }: ShiftTimePickerProps) {
   const [shifts, setShifts] = useState<ShiftTime[]>([])
   const [showPresets, setShowPresets] = useState(false)
+  const isInitialMount = React.useRef(true)
 
   // Parse existing value on mount
   React.useEffect(() => {
@@ -158,13 +159,16 @@ export function ShiftTimePicker({
         setShifts(simpleShifts)
       }
     }
-  }, [value])
+    isInitialMount.current = false
+  }, []) // Only run on mount
 
-  // Update parent when shifts change
+  // Update parent when shifts change (but not on initial mount)
   React.useEffect(() => {
-    const serialized = JSON.stringify(shifts)
-    onChange(serialized)
-  }, [shifts, onChange])
+    if (!isInitialMount.current) {
+      const serialized = JSON.stringify(shifts)
+      onChange(serialized)
+    }
+  }, [shifts]) // Remove onChange from dependencies to prevent infinite loop
 
   const parseSimpleFormat = (value: string): ShiftTime[] => {
     // Try to parse formats like "08:00 - 17:00" or "Mon-Fri: 08:00-17:00"
@@ -241,7 +245,7 @@ export function ShiftTimePicker({
     }, {} as Record<string, string[]>)
 
     return Object.entries(groupedByTime)
-      .map(([time, days]) => `${days.join(', ')}: ${time}`)
+      .map(([time, days]) => `${(days as string[]).join(', ')}: ${time}`)
       .join(' | ')
   }
 

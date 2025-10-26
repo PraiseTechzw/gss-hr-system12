@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { formatShiftTimesForDisplay, getShiftSummary } from "@/components/ui/shift-time-picker"
+import { Eye, Pencil, Trash2, Search, Filter, Download, MoreHorizontal, ArrowUpDown, ChevronLeft, ChevronRight, MapPin, Calendar, Users, Grid, List, Clock } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
@@ -358,6 +359,7 @@ export function DeploymentTable({ deployments }: { deployments: Deployment[] }) 
                 <SortableHeader field="site_location">Site Location</SortableHeader>
                 <TableHead>Type</TableHead>
                 <SortableHeader field="start_date">Start Date</SortableHeader>
+                <TableHead>Shift Timing</TableHead>
                 <SortableHeader field="salary">Salary</SortableHeader>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
@@ -366,7 +368,7 @@ export function DeploymentTable({ deployments }: { deployments: Deployment[] }) 
             <TableBody>
               {paginatedDeployments.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center text-gray-500 py-8">
+                  <TableCell colSpan={10} className="text-center text-gray-500 py-8">
                     <MapPin className="mx-auto h-12 w-12 text-gray-300 mb-4" />
                     <p className="text-lg font-medium">No deployments found</p>
                     <p className="text-sm">Try adjusting your search or filter criteria</p>
@@ -410,6 +412,16 @@ export function DeploymentTable({ deployments }: { deployments: Deployment[] }) 
                       <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4 text-gray-400" />
                         {new Date(deployment.start_date).toLocaleDateString()}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="max-w-xs">
+                        <div className="text-sm font-medium text-gray-900">
+                          {getShiftSummary(deployment.shift_timing || '').summary}
+                        </div>
+                        <div className="text-xs text-gray-500 truncate">
+                          {formatShiftTimesForDisplay(deployment.shift_timing || '')}
+                        </div>
                       </div>
                     </TableCell>
                     <TableCell>
@@ -506,6 +518,16 @@ export function DeploymentTable({ deployments }: { deployments: Deployment[] }) 
                       {new Date(deployment.start_date).toLocaleDateString()}
                     </div>
                     <Badge variant="outline">{deployment.deployment_type}</Badge>
+                  </div>
+                  
+                  <div className="text-sm">
+                    <div className="flex items-center gap-1 text-gray-500 mb-1">
+                      <Clock className="h-3 w-3" />
+                      <span className="font-medium">{getShiftSummary(deployment.shift_timing || '').summary}</span>
+                    </div>
+                    <div className="text-xs text-gray-400 truncate">
+                      {formatShiftTimesForDisplay(deployment.shift_timing || '')}
+                    </div>
                   </div>
                   
                   <div className="flex items-center justify-between">
