@@ -1,20 +1,17 @@
 "use client"
 
 import React from "react"
-import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Printer, Download, ArrowLeft } from "lucide-react"
-import { Card, CardContent } from "@/components/ui/card"
 
 interface PayslipPreviewProps {
   payslipData: any
-  isOpen: boolean
   onClose: () => void
   onPrint?: () => void
   onDownload?: () => void
 }
 
-export function PayslipPreview({ payslipData, isOpen, onClose, onPrint, onDownload }: PayslipPreviewProps) {
+export function PayslipPreview({ payslipData, onClose, onPrint, onDownload }: PayslipPreviewProps) {
   if (!payslipData) {
     return null
   }
@@ -22,10 +19,8 @@ export function PayslipPreview({ payslipData, isOpen, onClose, onPrint, onDownlo
   const { company, employee, payroll } = payslipData
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="fixed inset-0 w-screen h-screen max-w-none max-h-none overflow-y-auto p-0 m-0 z-50">
-        <div className="w-full h-full bg-white">
-          <div className="flex items-center justify-between p-4 bg-white border-b sticky top-0 z-10">
+    <div className="w-screen h-screen bg-white overflow-y-auto">
+      <div className="flex items-center justify-between p-4 bg-white border-b sticky top-0 z-10">
             <Button variant="ghost" size="sm" onClick={onClose}>
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back
