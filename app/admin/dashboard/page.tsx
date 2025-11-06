@@ -81,6 +81,7 @@ export default function AdminDashboard() {
 
       if (result.success && result.data) {
         setStats(result.data.stats)
+        setUserDistribution(result.data.userDistribution || {})
         setRecentUsers(result.data.recentUsers)
         setRecentActivity(result.data.recentActivity)
       } else {
