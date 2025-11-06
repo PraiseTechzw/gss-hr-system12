@@ -37,7 +37,14 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Public routes that don't require authentication
-  const publicRoutes = ["/auth/login", "/auth/register", "/"]
+  const publicRoutes = [
+    "/auth/login", 
+    "/auth/register", 
+    "/auth/setup-password",
+    "/auth/forgot-password",
+    "/auth/reset-password",
+    "/"
+  ]
   if (publicRoutes.includes(pathname)) {
     return NextResponse.next()
   }
@@ -59,7 +66,18 @@ export async function middleware(request: NextRequest) {
     }
 
     if (pathname.startsWith("/admin")) {
-      if (payload.role !== "admin") {
+      const userRole = payload.role?.toLowerCase() || ""
+      const isAdmin = userRole === "admin" || userRole === "super_admin"
+      
+      console.log("[Middleware] Admin route check:", {
+        pathname,
+        role: payload.role,
+        userRole,
+        isAdmin
+      })
+      
+      if (!isAdmin) {
+        console.log("[Middleware] Non-admin user trying to access admin route, redirecting to dashboard")
         return NextResponse.redirect(new URL("/dashboard", request.url))
       }
     }

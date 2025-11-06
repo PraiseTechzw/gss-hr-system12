@@ -64,6 +64,35 @@ export class AuthService {
       }
 
       console.log("[AuthService] User found:", { id: user.id, email: user.email, role: user.role })
+      
+      // Check if user needs to set up password (has temporary password marker)
+      const TEMP_PASSWORD_MARKER = '$2a$12$TEMP.PASSWORD.NEEDS.SETUP.REQUIRED.FOR.NEW.USER'
+      if (user.password_hash === TEMP_PASSWORD_MARKER) {
+        console.log("[AuthService] User needs to set up password")
+        return { 
+          success: false, 
+          error: "PASSWORD_SETUP_REQUIRED",
+          requiresPasswordSetup: true,
+          user: {
+            id: user.id,
+            email: user.email,
+            first_name: user.first_name,
+            last_name: user.last_name,
+            full_name: user.full_name,
+            role: user.role,
+            department_id: user.department_id,
+            position: user.position,
+            status: user.status,
+          }
+        }
+      }
+
+      // If password is empty and user doesn't have temp marker, require password
+      if (!password) {
+        console.log("[AuthService] Password is required")
+        return { success: false, error: "Password is required" }
+      }
+
       console.log("[AuthService] Verifying password...")
 
       // Verify password

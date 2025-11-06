@@ -59,22 +59,29 @@ export default function SystemSettings() {
   const fetchSettings = async () => {
     try {
       setLoading(true)
-      // In a real implementation, you would fetch from /api/admin/settings
-      // For now, we'll use the default settings
-      setSettings({
-        id: '1',
-        company_name: 'Genius Security Services (Pvt) Ltd',
-        company_address: '123 Business Park, Harare, Zimbabwe',
-        company_phone: '+263 4 123 4567',
-        company_email: 'info@geniussecurity.co.zw',
-        logo_url: '/logo.png',
-        nssa_rate: 0.045,
-        aids_levy_rate: 0.03,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      })
+      const response = await fetch('/api/admin/settings')
+      const data = await response.json()
+
+      if (data.success) {
+        const settingsData = data.data
+        setSettings({
+          id: '1',
+          company_name: settingsData.company_name || 'Genius Security Services (Pvt) Ltd',
+          company_address: settingsData.company_address || '',
+          company_phone: settingsData.company_phone || '',
+          company_email: settingsData.company_email || 'info@geniussecurity.co.zw',
+          logo_url: settingsData.logo_url || '/logo.png',
+          nssa_rate: parseFloat(settingsData.nssa_rate) || 0.045,
+          aids_levy_rate: parseFloat(settingsData.aids_levy_rate) || 0.03,
+          created_at: settingsData.created_at || new Date().toISOString(),
+          updated_at: settingsData.updated_at || new Date().toISOString()
+        })
+      } else {
+        toast.error('Failed to fetch settings', {
+          description: data.error || 'An error occurred'
+        })
+      }
     } catch (error) {
-      console.error('Error fetching settings:', error)
       toast.error('Connection error', {
         description: 'Unable to fetch settings. Please try again.'
       })
@@ -88,15 +95,38 @@ export default function SystemSettings() {
     
     try {
       setSaving(true)
-      // In a real implementation, you would save to /api/admin/settings
-      // For now, we'll simulate a save
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      toast.success('Settings saved successfully', {
-        description: 'Your system settings have been updated'
+      const response = await fetch('/api/admin/settings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          company_name: settings.company_name,
+          company_address: settings.company_address,
+          company_phone: settings.company_phone,
+          company_email: settings.company_email,
+          logo_url: settings.logo_url,
+          nssa_rate: settings.nssa_rate.toString(),
+          aids_levy_rate: settings.aids_levy_rate.toString()
+        })
       })
+
+      const data = await response.json()
+
+      if (data.success) {
+        toast.success('Settings saved successfully', {
+          description: 'Your system settings have been updated'
+        })
+        setSettings(prev => ({
+          ...prev,
+          updated_at: new Date().toISOString()
+        }))
+      } else {
+        toast.error('Failed to save settings', {
+          description: data.error || 'An error occurred'
+        })
+      }
     } catch (error) {
-      console.error('Error saving settings:', error)
       toast.error('Connection error', {
         description: 'Unable to save settings. Please try again.'
       })

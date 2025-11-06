@@ -57,6 +57,29 @@ export default function LoginForm() {
 
       const data = await response.json()
 
+      // Check if user needs to set up password
+      if (data.requiresPasswordSetup && data.user) {
+        toast.dismiss(loadingToast)
+        
+        toast.info('Password setup required', {
+          description: 'Redirecting you to set up your password...',
+          icon: <Lock className="w-4 h-4" />,
+          duration: 2000,
+        })
+
+        // Redirect to password setup page immediately
+        // Use replace to avoid back button issues
+        const setupUrl = `/auth/setup-password?email=${encodeURIComponent(formData.email)}`
+        router.replace(setupUrl)
+        // Fallback: if router doesn't work, use window.location
+        setTimeout(() => {
+          if (window.location.pathname !== '/auth/setup-password') {
+            window.location.href = setupUrl
+          }
+        }, 100)
+        return
+      }
+
       if (data.success) {
         // Dismiss loading toast
         toast.dismiss(loadingToast)
@@ -183,11 +206,14 @@ export default function LoginForm() {
                     autoComplete="current-password"
                     value={formData.password}
                     onChange={handleInputChange}
-                    placeholder="Enter your password"
+                    placeholder="Enter your password (or any value for new users)"
                     required
                     disabled={isLoading}
                     className="pl-10 pr-10 transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
+                  <p className="text-xs text-gray-500 mt-1">
+                    New users: Enter any password to be redirected to password setup
+                  </p>
                   <button
                     type="button"
                     className="absolute inset-y-0 right-0 pr-3 flex items-center transition-colors duration-200 hover:text-blue-500"

@@ -9,18 +9,35 @@ export async function POST(request: NextRequest) {
     const { email, password } = await request.json()
     console.log("[API] Login attempt for email:", email)
 
-    if (!email || !password) {
-      console.log("[API] Missing email or password")
+    if (!email) {
+      console.log("[API] Missing email")
       return NextResponse.json(
-        { success: false, error: 'Email and password are required' },
+        { success: false, error: 'Email is required' },
         { status: 400 }
       )
     }
+
+    // Allow empty password to check if user needs password setup
+    // If password is empty, we'll check the user's password_hash status
 
     console.log("[API] Calling AuthService.authenticate...")
     // Authenticate user
     const authResult = await AuthService.authenticate(email, password)
     console.log("[API] Authentication result:", { success: authResult.success, error: authResult.error })
+
+    // Check if user needs to set up password
+    if (authResult.error === 'PASSWORD_SETUP_REQUIRED' && (authResult as any).requiresPasswordSetup) {
+      console.log("[API] User needs password setup")
+      return NextResponse.json(
+        { 
+          success: false, 
+          requiresPasswordSetup: true,
+          user: (authResult as any).user,
+          error: 'Please set up your password to continue' 
+        },
+        { status: 200 } // Use 200 to allow frontend to handle redirect
+      )
+    }
 
     if (!authResult.success || !authResult.user) {
       console.log("[API] Authentication failed:", authResult.error)
@@ -31,6 +48,12 @@ export async function POST(request: NextRequest) {
     }
 
     console.log("[API] Authentication successful, generating token...")
+    console.log("[API] User data for token:", {
+      id: authResult.user.id,
+      email: authResult.user.email,
+      role: authResult.user.role,
+      full_name: authResult.user.full_name
+    })
     // Generate JWT token
     const token = AuthService.generateToken(authResult.user)
     console.log("[API] Token generated successfully")

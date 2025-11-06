@@ -34,14 +34,12 @@ interface AuditLog {
   id: string
   user_id?: string
   action: string
-  table_name?: string
-  record_id?: string
-  old_values?: any
-  new_values?: any
+  description?: string
+  details?: any
   ip_address?: string
   user_agent?: string
   created_at: string
-  users?: {
+  user_profiles?: {
     id: string
     full_name: string
     email: string
@@ -108,7 +106,6 @@ export default function AuditLogs() {
         })
       }
     } catch (error) {
-      console.error('Error fetching audit logs:', error)
       toast.error('Connection error', {
         description: 'Unable to fetch audit logs. Please try again.'
       })
@@ -141,7 +138,6 @@ export default function AuditLogs() {
         description: 'Audit log export will be available in the next update'
       })
     } catch (error) {
-      console.error('Error exporting audit logs:', error)
       toast.error('Export failed', {
         description: 'Unable to export audit logs. Please try again.'
       })
@@ -182,9 +178,9 @@ export default function AuditLogs() {
     const searchLower = searchTerm.toLowerCase()
     return (
       log.action.toLowerCase().includes(searchLower) ||
-      log.table_name?.toLowerCase().includes(searchLower) ||
-      log.users?.full_name.toLowerCase().includes(searchLower) ||
-      log.users?.email.toLowerCase().includes(searchLower)
+      log.description?.toLowerCase().includes(searchLower) ||
+      log.user_profiles?.full_name.toLowerCase().includes(searchLower) ||
+      log.user_profiles?.email.toLowerCase().includes(searchLower)
     )
   })
 
@@ -239,23 +235,26 @@ export default function AuditLogs() {
                 <DropdownMenuItem onClick={() => setActionFilter('all')}>
                   All Actions
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setActionFilter('user_created')}>
-                  User Created
+                <DropdownMenuItem onClick={() => setActionFilter('create')}>
+                  Create
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setActionFilter('user_updated')}>
-                  User Updated
+                <DropdownMenuItem onClick={() => setActionFilter('update')}>
+                  Update
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setActionFilter('user_deleted')}>
-                  User Deleted
+                <DropdownMenuItem onClick={() => setActionFilter('delete')}>
+                  Delete
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setActionFilter('department_created')}>
-                  Department Created
+                <DropdownMenuItem onClick={() => setActionFilter('login')}>
+                  Login
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setActionFilter('department_updated')}>
-                  Department Updated
+                <DropdownMenuItem onClick={() => setActionFilter('logout')}>
+                  Logout
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setActionFilter('department_deleted')}>
-                  Department Deleted
+                <DropdownMenuItem onClick={() => setActionFilter('approve')}>
+                  Approve
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setActionFilter('reject')}>
+                  Reject
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -311,13 +310,11 @@ export default function AuditLogs() {
                           {formatAction(log.action)}
                         </h3>
                         <p className="text-sm text-gray-600">
-                          {log.table_name && (
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 mr-2">
-                              {log.table_name}
-                            </span>
-                          )}
-                          {log.users ? (
-                            <span>by {log.users.full_name} ({log.users.email})</span>
+                          {log.description || 'System activity'}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {log.user_profiles ? (
+                            <span>by {log.user_profiles.full_name} ({log.user_profiles.email})</span>
                           ) : (
                             <span>by System</span>
                           )}
@@ -335,23 +332,12 @@ export default function AuditLogs() {
                       </div>
                     </div>
                     
-                    {log.old_values && log.new_values && (
+                    {log.details && Object.keys(log.details).length > 0 && (
                       <div className="mt-3 p-3 bg-white rounded-lg border">
-                        <p className="text-xs font-medium text-gray-700 mb-2">Changes:</p>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <p className="text-xs font-medium text-red-600 mb-1">Old Values:</p>
-                            <pre className="text-xs text-gray-600 bg-red-50 p-2 rounded">
-                              {JSON.stringify(log.old_values, null, 2)}
-                            </pre>
-                          </div>
-                          <div>
-                            <p className="text-xs font-medium text-green-600 mb-1">New Values:</p>
-                            <pre className="text-xs text-gray-600 bg-green-50 p-2 rounded">
-                              {JSON.stringify(log.new_values, null, 2)}
-                            </pre>
-                          </div>
-                        </div>
+                        <p className="text-xs font-medium text-gray-700 mb-2">Details:</p>
+                        <pre className="text-xs text-gray-600 bg-gray-50 p-2 rounded overflow-auto">
+                          {JSON.stringify(log.details, null, 2)}
+                        </pre>
                       </div>
                     )}
                   </div>

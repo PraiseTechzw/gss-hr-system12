@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
-import { AuthService } from '@/lib/auth'
+import { createClient } from '@supabase/supabase-js'
+import { AuthService } from '@/lib/auth-service'
 import bcrypt from 'bcryptjs'
 
 export async function GET(request: NextRequest) {
@@ -21,15 +21,15 @@ export async function GET(request: NextRequest) {
     const departmentId = searchParams.get('departmentId')
     const status = searchParams.get('status') || 'active'
 
-    const supabase = await createClient()
+    // Use service role client to bypass RLS for admin operations
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_URL_SUPABASE_SERVICE_ROLE_KEY!
+    const supabase = createClient(supabaseUrl, serviceRoleKey)
 
-    // Build query
+    // Build query - fetch users first
     let query = supabase
       .from('user_profiles')
-      .select(`
-        *,
-        departments (id, name)
-      `)
+      .select('*')
       .eq('status', status === 'active' ? 'active' : 'inactive')
 
     // Apply filters
@@ -51,9 +51,34 @@ export async function GET(request: NextRequest) {
       }, { status: 500 })
     }
 
+    // Fetch departments for users who have department_id
+    const departmentIds = users?.filter(u => u.department_id).map(u => u.department_id) || []
+    let departmentsMap: Record<string, any> = {}
+    
+    if (departmentIds.length > 0) {
+      const { data: departments } = await supabase
+        .from('departments')
+        .select('id, name')
+        .in('id', departmentIds)
+      
+      departments?.forEach(dept => {
+        departmentsMap[dept.id] = dept
+      })
+    }
+
+    // Check for temporary password marker
+    const TEMP_PASSWORD_MARKER = '$2a$12$TEMP.PASSWORD.NEEDS.SETUP.REQUIRED.FOR.NEW.USER'
+    
+    // Add department info and password setup status to users
+    const usersWithDepartments = users?.map(user => ({
+      ...user,
+      departments: user.department_id ? departmentsMap[user.department_id] : null,
+      requires_password_setup: user.password_hash === TEMP_PASSWORD_MARKER
+    })) || []
+
     return NextResponse.json({
       success: true,
-      data: users
+      data: usersWithDepartments
     })
 
   } catch (error) {
@@ -91,18 +116,25 @@ export async function POST(request: NextRequest) {
     // Validate required fields
     if (!email || !fullName || !role) {
       return NextResponse.json({ 
-        error: 'Missing required fields: email, fullName, role' 
+        success: false,
+        error: 'Missing required fields: email, fullName, role',
+        received: { email: !!email, fullName: !!fullName, role: !!role }
       }, { status: 400 })
     }
 
-    // Validate role
-    if (!['admin', 'hr', 'manager', 'employee'].includes(role)) {
+    // Validate role - database enum only supports admin, manager, hr
+    const validRoles = ['admin', 'hr', 'manager']
+    if (!validRoles.includes(role)) {
       return NextResponse.json({ 
-        error: 'Invalid role. Must be: admin, hr, manager, employee' 
+        success: false,
+        error: `Invalid role. Must be one of: ${validRoles.join(', ')}` 
       }, { status: 400 })
     }
 
-    const supabase = await createClient()
+    // Use service role client to bypass RLS
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_URL_SUPABASE_SERVICE_ROLE_KEY!
+    const supabase = createClient(supabaseUrl, serviceRoleKey)
 
     // Check if user already exists
     const { data: existingUser } = await supabase
@@ -117,55 +149,67 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 12)
-
-    // Create user
+    // For new users, set a temporary password marker that requires setup
+    // Import the constant from a shared location
+    const TEMP_PASSWORD_MARKER = '$2a$12$TEMP.PASSWORD.NEEDS.SETUP.REQUIRED.FOR.NEW.USER'
+    
+    // Create user with temporary password marker (user must set password on first login)
     const { data: newUser, error: createError } = await supabase
       .from('user_profiles')
       .insert({
-        email,
-        first_name: fullName.split(' ')[0],
-        last_name: fullName.split(' ').slice(1).join(' '),
-        full_name: fullName,
+        email: email.toLowerCase().trim(),
+        first_name: fullName.split(' ')[0] || fullName,
+        last_name: fullName.split(' ').slice(1).join(' ') || '',
+        full_name: fullName.trim(),
         role,
-        department_id: departmentId || null,
+        department_id: departmentId && departmentId !== '' ? departmentId : null,
         status: 'active',
-        password_hash: hashedPassword
+        password_hash: TEMP_PASSWORD_MARKER // User must set password on first login
       })
-      .select(`
-        *,
-        departments (id, name)
-      `)
+      .select('*')
       .single()
 
     if (createError) {
       return NextResponse.json({ 
+        success: false,
         error: 'Failed to create user',
-        details: createError.message 
+        details: createError.message,
+        code: createError.code
       }, { status: 500 })
     }
 
     // Log the action
     await supabase
-      .from('audit_logs')
+      .from('system_activity')
       .insert({
         user_id: authResult.user.id,
-        action: 'user_created',
-        table_name: 'users',
-        record_id: newUser.id,
-        new_values: {
+        action: 'create',
+        description: `User created: ${fullName} (${email}) - Password setup required`,
+        details: {
+          type: 'user_created',
           email,
           full_name: fullName,
           role,
-          department_id: departmentId
+          department_id: departmentId,
+          requires_password_setup: true
         }
       })
 
     return NextResponse.json({
       success: true,
       data: newUser,
-      message: 'User created successfully'
+      message: 'User created successfully',
+      requiresPasswordSetup: true,
+      instructions: {
+        title: 'Password Setup Required',
+        message: `The user ${fullName} (${email}) has been created successfully. They will need to set up their password on first login.`,
+        steps: [
+          'Inform the user that their account has been created',
+          'They should go to the login page and enter their email',
+          'They will be automatically redirected to set up their password',
+          'After setting their password, they can log in normally'
+        ]
+      }
     })
 
   } catch (error) {
@@ -206,7 +250,10 @@ export async function PUT(request: NextRequest) {
       }, { status: 400 })
     }
 
-    const supabase = await createClient()
+    // Use service role client to bypass RLS
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_URL_SUPABASE_SERVICE_ROLE_KEY!
+    const supabase = createClient(supabaseUrl, serviceRoleKey)
 
     // Get current user data for audit
     const { data: currentUser } = await supabase
@@ -237,10 +284,7 @@ export async function PUT(request: NextRequest) {
       .from('user_profiles')
       .update(updateData)
       .eq('id', userId)
-      .select(`
-        *,
-        departments (id, name)
-      `)
+      .select('*')
       .single()
 
     if (updateError) {
@@ -252,14 +296,16 @@ export async function PUT(request: NextRequest) {
 
     // Log the action
     await supabase
-      .from('audit_logs')
+      .from('system_activity')
       .insert({
         user_id: authResult.user.id,
-        action: 'user_updated',
-        table_name: 'users',
-        record_id: userId,
-        old_values: currentUser,
-        new_values: updatedUser
+        action: 'update',
+        description: `User updated: ${updatedUser.full_name || updatedUser.email}`,
+        details: {
+          type: 'user_updated',
+          user_id: userId,
+          changes: updateData
+        }
       })
 
     return NextResponse.json({
@@ -306,7 +352,10 @@ export async function DELETE(request: NextRequest) {
       }, { status: 400 })
     }
 
-    const supabase = await createClient()
+    // Use service role client to bypass RLS
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_URL_SUPABASE_SERVICE_ROLE_KEY!
+    const supabase = createClient(supabaseUrl, serviceRoleKey)
 
     // Get user data for audit
     const { data: userToDelete } = await supabase
@@ -336,13 +385,15 @@ export async function DELETE(request: NextRequest) {
 
     // Log the action
     await supabase
-      .from('audit_logs')
+      .from('system_activity')
       .insert({
         user_id: authResult.user.id,
-        action: 'user_deleted',
-        table_name: 'users',
-        record_id: userId,
-        old_values: userToDelete
+        action: 'delete',
+        description: `User deactivated: ${userToDelete.full_name || userToDelete.email}`,
+        details: {
+          type: 'user_deactivated',
+          user_id: userId
+        }
       })
 
     return NextResponse.json({

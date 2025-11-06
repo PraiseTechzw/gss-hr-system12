@@ -185,17 +185,6 @@ export function AppSidebar({ user: propUser }: AppSidebarProps = {}) {
   const isManager = normalizedRole === "manager"
   const isHR = normalizedRole === "hr"
 
-  console.log("Sidebar Debug:", {
-    userProfile,
-    userRole,
-    normalizedRole,
-    isAdmin,
-    isManager,
-    isHR,
-    adminNavigation: adminNavigation.length,
-    baseNavigation: baseNavigation.length,
-  })
-
   // Get user permissions
   const permissions = getRolePermissions(userRole)
   
@@ -236,13 +225,6 @@ export function AppSidebar({ user: propUser }: AppSidebarProps = {}) {
   
   const navigation = [...baseFilteredNavigation, ...adminFilteredNavigation]
 
-  console.log("Filtered Navigation:", {
-    baseFiltered: baseFilteredNavigation.length,
-    adminFiltered: adminFilteredNavigation.length,
-    total: navigation.length,
-    adminItems: adminFilteredNavigation.map((item) => item.name),
-  })
-
   useEffect(() => {
     // Only fetch user data if no prop user is provided
     if (!propUser) {
@@ -254,12 +236,9 @@ export function AppSidebar({ user: propUser }: AppSidebarProps = {}) {
         if (data.success && data.user) {
           setUser(data.user)
           setUserProfile(data.user)
-          console.log("[Sidebar] User loaded:", data.user)
-        } else {
-          console.error("[Sidebar] Failed to load user:", data.error)
         }
       } catch (error) {
-        console.error("[Sidebar] Error fetching user:", error)
+        // Silent error handling for production
       }
     }
     getUser()
@@ -267,7 +246,6 @@ export function AppSidebar({ user: propUser }: AppSidebarProps = {}) {
       // Use prop user data
       setUser(propUser)
       setUserProfile(propUser)
-      console.log("[Sidebar] Using prop user:", propUser)
     }
 
     const savedRecent = localStorage.getItem("recentPages")
@@ -295,7 +273,7 @@ export function AppSidebar({ user: propUser }: AppSidebarProps = {}) {
       router.push("/auth/login")
       router.refresh()
     } catch (error) {
-      console.error("[Sidebar] Logout error:", error)
+      // Silent error handling for production
     }
   }
 

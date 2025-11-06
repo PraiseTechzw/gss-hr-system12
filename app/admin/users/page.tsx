@@ -27,7 +27,9 @@ import {
   Building2,
   Mail,
   Phone,
-  Calendar
+  Calendar,
+  Lock,
+  AlertCircle
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -35,10 +37,11 @@ interface User {
   id: string
   email: string
   full_name: string
-  role: 'admin' | 'hr' | 'manager' | 'employee'
+  role: 'admin' | 'hr' | 'manager'
   department_id?: string
   is_active: boolean
   created_at: string
+  requires_password_setup?: boolean
   departments?: {
     id: string
     name: string
@@ -61,7 +64,7 @@ export default function UserManagement() {
   const [newUser, setNewUser] = useState({
     email: '',
     fullName: '',
-    role: 'employee',
+    role: 'hr',
     departmentId: '',
     password: 'default123'
   })
@@ -84,7 +87,6 @@ export default function UserManagement() {
         })
       }
     } catch (error) {
-      console.error('Error fetching users:', error)
       toast.error('Connection error', {
         description: 'Unable to fetch users. Please try again.'
       })
@@ -108,27 +110,60 @@ export default function UserManagement() {
       const data = await response.json()
 
       if (data.success) {
-        toast.success('User created successfully', {
-          description: `${newUser.fullName} has been added to the system`
-        })
+        // Show success message with password setup instructions
+        if (data.requiresPasswordSetup && data.instructions) {
+          toast.success('User created successfully', {
+            description: `${newUser.fullName} has been added. They need to set up their password on first login.`,
+            duration: 6000,
+            action: {
+              label: 'View Instructions',
+              onClick: () => {
+                // Show detailed instructions
+                const instructions = data.instructions
+                alert(
+                  `${instructions.title}\n\n` +
+                  `${instructions.message}\n\n` +
+                  `Instructions for the new user:\n` +
+                  instructions.steps.map((step: string, i: number) => `${i + 1}. ${step}`).join('\n') +
+                  `\n\nUser Email: ${newUser.email}\n` +
+                  `User Name: ${newUser.fullName}`
+                )
+              }
+            }
+          })
+          
+          // Also show a more detailed toast with key info
+          setTimeout(() => {
+            toast.info('Password Setup Required', {
+              description: `Tell ${newUser.fullName} to login with their email (${newUser.email}). They will be prompted to set their password.`,
+              duration: 8000,
+            })
+          }, 1000)
+        } else {
+          toast.success('User created successfully', {
+            description: `${newUser.fullName} has been added to the system`
+          })
+        }
+        
         setShowAddUser(false)
         setNewUser({
           email: '',
           fullName: '',
-          role: 'employee',
+          role: 'hr',
           departmentId: '',
           password: 'default123'
         })
         fetchUsers()
       } else {
+        const errorMsg = data.details || data.error || 'An error occurred'
         toast.error('Failed to create user', {
-          description: data.error || 'An error occurred'
+          description: errorMsg
         })
       }
     } catch (error) {
-      console.error('Error creating user:', error)
+      const errorMsg = error instanceof Error ? error.message : 'Unable to create user. Please try again.'
       toast.error('Connection error', {
-        description: 'Unable to create user. Please try again.'
+        description: errorMsg
       })
     }
   }
@@ -156,7 +191,6 @@ export default function UserManagement() {
         })
       }
     } catch (error) {
-      console.error('Error deleting user:', error)
       toast.error('Connection error', {
         description: 'Unable to deactivate user. Please try again.'
       })
@@ -171,8 +205,6 @@ export default function UserManagement() {
         return 'default'
       case 'manager':
         return 'secondary'
-      case 'employee':
-        return 'outline'
       default:
         return 'outline'
     }
@@ -186,8 +218,6 @@ export default function UserManagement() {
         return <Users className="w-3 h-3" />
       case 'manager':
         return <Building2 className="w-3 h-3" />
-      case 'employee':
-        return <Users className="w-3 h-3" />
       default:
         return <Users className="w-3 h-3" />
     }
@@ -260,9 +290,6 @@ export default function UserManagement() {
                 <DropdownMenuItem onClick={() => setRoleFilter('manager')}>
                   Manager
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setRoleFilter('employee')}>
-                  Employee
-                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
             <Button onClick={() => setShowAddUser(true)}>
@@ -278,7 +305,7 @@ export default function UserManagement() {
             <CardHeader>
               <CardTitle>Add New User</CardTitle>
               <CardDescription>
-                Create a new user account with appropriate role and permissions.
+                Create a new user account with appropriate role and permissions. The user will need to set up their password on first login.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -311,9 +338,8 @@ export default function UserManagement() {
                       onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
-                      <option value="employee">Employee</option>
-                      <option value="manager">Manager</option>
                       <option value="hr">HR</option>
+                      <option value="manager">Manager</option>
                       <option value="admin">Admin</option>
                     </select>
                   </div>
@@ -326,6 +352,15 @@ export default function UserManagement() {
                       placeholder="Department ID"
                     />
                   </div>
+                </div>
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <p className="text-sm font-medium text-blue-900 mb-2">📋 What to tell the new user:</p>
+                  <ul className="text-xs text-blue-800 space-y-1 list-disc list-inside">
+                    <li>Their account has been created with email: <strong>{newUser.email || '[email]'}</strong></li>
+                    <li>They should go to the login page and enter their email address</li>
+                    <li>They will be automatically redirected to set up their password</li>
+                    <li>After setting their password, they can log in normally</li>
+                  </ul>
                 </div>
                 <div className="flex justify-end space-x-2">
                   <Button type="button" variant="outline" onClick={() => setShowAddUser(false)}>
@@ -353,11 +388,22 @@ export default function UserManagement() {
                       </span>
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold text-gray-900">{user.full_name}</h3>
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-lg font-semibold text-gray-900">{user.full_name}</h3>
+                        {user.requires_password_setup && (
+                          <AlertCircle className="h-4 w-4 text-orange-500" title="Password setup required" />
+                        )}
+                      </div>
                       <p className="text-sm text-gray-600 flex items-center">
                         <Mail className="h-4 w-4 mr-1" />
                         {user.email}
                       </p>
+                      {user.requires_password_setup && (
+                        <p className="text-xs text-orange-600 flex items-center mt-1">
+                          <Lock className="h-3 w-3 mr-1" />
+                          User needs to set up password on first login
+                        </p>
+                      )}
                       {user.departments && (
                         <p className="text-sm text-gray-600 flex items-center mt-1">
                           <Building2 className="h-4 w-4 mr-1" />
@@ -367,6 +413,12 @@ export default function UserManagement() {
                     </div>
                   </div>
                   <div className="flex items-center space-x-3">
+                    {user.requires_password_setup && (
+                      <Badge variant="destructive" className="flex items-center space-x-1">
+                        <Lock className="h-3 w-3" />
+                        <span>Password Setup Required</span>
+                      </Badge>
+                    )}
                     <Badge variant={getRoleBadgeVariant(user.role)} className="flex items-center space-x-1">
                       {getRoleIcon(user.role)}
                       <span>{user.role.toUpperCase()}</span>

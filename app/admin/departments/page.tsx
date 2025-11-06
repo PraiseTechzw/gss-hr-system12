@@ -81,7 +81,6 @@ export default function DepartmentManagement() {
         })
       }
     } catch (error) {
-      console.error('Error fetching departments:', error)
       toast.error('Connection error', {
         description: 'Unable to fetch departments. Please try again.'
       })
@@ -121,7 +120,6 @@ export default function DepartmentManagement() {
         })
       }
     } catch (error) {
-      console.error('Error creating department:', error)
       toast.error('Connection error', {
         description: 'Unable to create department. Please try again.'
       })
@@ -151,7 +149,6 @@ export default function DepartmentManagement() {
         })
       }
     } catch (error) {
-      console.error('Error deleting department:', error)
       toast.error('Connection error', {
         description: 'Unable to deactivate department. Please try again.'
       })

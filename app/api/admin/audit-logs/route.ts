@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { AuthService } from '@/lib/auth'
+import { AuthService } from '@/lib/auth-service'
 
 export async function GET(request: NextRequest) {
   try {
@@ -28,10 +28,10 @@ export async function GET(request: NextRequest) {
 
     // Build query
     let query = supabase
-      .from('audit_logs')
+      .from('system_activity')
       .select(`
         *,
-        users!audit_logs_user_id_fkey (
+        user_profiles!system_activity_user_id_fkey (
           id,
           full_name,
           email,
@@ -47,7 +47,8 @@ export async function GET(request: NextRequest) {
     }
 
     if (tableName) {
-      query = query.eq('table_name', tableName)
+      // Filter by table name in details JSONB
+      query = query.contains('details', { table_name: tableName })
     }
 
     if (userId) {
@@ -73,11 +74,11 @@ export async function GET(request: NextRequest) {
 
     // Get total count for pagination
     let countQuery = supabase
-      .from('audit_logs')
+      .from('system_activity')
       .select('*', { count: 'exact', head: true })
 
     if (action) countQuery = countQuery.eq('action', action)
-    if (tableName) countQuery = countQuery.eq('table_name', tableName)
+    if (tableName) countQuery = countQuery.contains('details', { table_name: tableName })
     if (userId) countQuery = countQuery.eq('user_id', userId)
     if (startDate) countQuery = countQuery.gte('created_at', startDate)
     if (endDate) countQuery = countQuery.lte('created_at', endDate)

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { AuthService } from '@/lib/auth'
+import { AuthService } from '@/lib/auth-service'
 
 export async function GET(request: NextRequest) {
   try {
@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
       .from('departments')
       .select(`
         *,
-        users!departments_manager_id_fkey (
+        user_profiles!departments_manager_id_fkey (
           id,
           full_name,
           email,
@@ -33,10 +33,9 @@ export async function GET(request: NextRequest) {
         ),
         employees (
           id,
-          active
+          status
         )
       `)
-      .eq('is_active', status === 'active')
       .order('name')
 
     if (error) {
@@ -47,11 +46,11 @@ export async function GET(request: NextRequest) {
     }
 
     // Add employee count to each department
-    const departmentsWithCounts = departments.map(dept => ({
+    const departmentsWithCounts = departments?.map(dept => ({
       ...dept,
-      employee_count: dept.employees.filter((emp: any) => emp.active).length,
-      total_employees: dept.employees.length
-    }))
+      employee_count: dept.employees?.filter((emp: any) => emp.status === 'active').length || 0,
+      total_employees: dept.employees?.length || 0
+    })) || []
 
     return NextResponse.json({
       success: true,
@@ -108,7 +107,7 @@ export async function POST(request: NextRequest) {
     // Validate manager if provided
     if (managerId) {
       const { data: manager } = await supabase
-        .from('users')
+        .from('user_profiles')
         .select('id, role')
         .eq('id', managerId)
         .single()
@@ -132,12 +131,11 @@ export async function POST(request: NextRequest) {
       .insert({
         name,
         description: description || null,
-        manager_id: managerId || null,
-        is_active: true
+        manager_id: managerId || null
       })
       .select(`
         *,
-        users!departments_manager_id_fkey (
+        user_profiles!departments_manager_id_fkey (
           id,
           full_name,
           email,
@@ -155,13 +153,13 @@ export async function POST(request: NextRequest) {
 
     // Log the action
     await supabase
-      .from('audit_logs')
+      .from('system_activity')
       .insert({
         user_id: authResult.user.id,
-        action: 'department_created',
-        table_name: 'departments',
-        record_id: newDepartment.id,
-        new_values: {
+        action: 'create',
+        description: `Department created: ${name}`,
+        details: {
+          type: 'department_created',
           name,
           description,
           manager_id: managerId
@@ -229,7 +227,7 @@ export async function PUT(request: NextRequest) {
     // Validate manager if provided
     if (managerId) {
       const { data: manager } = await supabase
-        .from('users')
+        .from('user_profiles')
         .select('id, role')
         .eq('id', managerId)
         .single()
@@ -252,7 +250,6 @@ export async function PUT(request: NextRequest) {
     if (name !== undefined) updateData.name = name
     if (description !== undefined) updateData.description = description
     if (managerId !== undefined) updateData.manager_id = managerId
-    if (isActive !== undefined) updateData.is_active = isActive
 
     const { data: updatedDept, error: updateError } = await supabase
       .from('departments')
@@ -260,7 +257,7 @@ export async function PUT(request: NextRequest) {
       .eq('id', departmentId)
       .select(`
         *,
-        users!departments_manager_id_fkey (
+        user_profiles!departments_manager_id_fkey (
           id,
           full_name,
           email,
@@ -278,14 +275,16 @@ export async function PUT(request: NextRequest) {
 
     // Log the action
     await supabase
-      .from('audit_logs')
+      .from('system_activity')
       .insert({
         user_id: authResult.user.id,
-        action: 'department_updated',
-        table_name: 'departments',
-        record_id: departmentId,
-        old_values: currentDept,
-        new_values: updatedDept
+        action: 'update',
+        description: `Department updated: ${updatedDept.name}`,
+        details: {
+          type: 'department_updated',
+          department_id: departmentId,
+          changes: updateData
+        }
       })
 
     return NextResponse.json({
@@ -332,7 +331,7 @@ export async function DELETE(request: NextRequest) {
       .from('employees')
       .select('id')
       .eq('department_id', departmentId)
-      .eq('active', true)
+      .eq('status', 'active')
 
     if (empError) {
       return NextResponse.json({ 
@@ -359,10 +358,10 @@ export async function DELETE(request: NextRequest) {
       }, { status: 404 })
     }
 
-    // Soft delete (deactivate) instead of hard delete
+    // Hard delete (departments table doesn't have status field)
     const { error: deleteError } = await supabase
       .from('departments')
-      .update({ is_active: false })
+      .delete()
       .eq('id', departmentId)
 
     if (deleteError) {
@@ -374,13 +373,15 @@ export async function DELETE(request: NextRequest) {
 
     // Log the action
     await supabase
-      .from('audit_logs')
+      .from('system_activity')
       .insert({
         user_id: authResult.user.id,
-        action: 'department_deleted',
-        table_name: 'departments',
-        record_id: departmentId,
-        old_values: deptToDelete
+        action: 'delete',
+        description: `Department deleted: ${deptToDelete.name}`,
+        details: {
+          type: 'department_deleted',
+          department_id: departmentId
+        }
       })
 
     return NextResponse.json({
