@@ -161,10 +161,11 @@ export default function LoginForm() {
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-600">
+            <form onSubmit={handleSubmit} className="space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-600">
               {error && (
-                <Alert variant="destructive" className="animate-in fade-in slide-in-from-top-2 duration-300">
-                  <AlertDescription>{error}</AlertDescription>
+                <Alert variant="destructive" className="animate-in fade-in slide-in-from-top-2 duration-300 border-2 border-red-200 bg-red-50">
+                  <XCircle className="h-4 w-4 text-red-600" />
+                  <AlertDescription className="font-medium text-red-800">{error}</AlertDescription>
                 </Alert>
               )}
 
@@ -173,8 +174,12 @@ export default function LoginForm() {
                   Email address
                 </Label>
                 <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Mail className="h-5 w-5 text-gray-400 transition-colors duration-200 group-focus-within:text-blue-500" />
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
+                    <Mail className={`h-5 w-5 transition-all duration-300 ${
+                      formData.email 
+                        ? 'text-blue-500' 
+                        : 'text-gray-400 group-focus-within:text-blue-500'
+                    }`} />
                   </div>
                   <Input
                     id="email"
@@ -183,11 +188,24 @@ export default function LoginForm() {
                     autoComplete="email"
                     value={formData.email}
                     onChange={handleInputChange}
-                    placeholder="Enter your email"
+                    placeholder="name@example.com"
                     required
                     disabled={isLoading}
-                    className="pl-10 transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className={`pl-12 pr-4 h-12 text-base border-2 transition-all duration-300 ${
+                      error && formData.email
+                        ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
+                        : 'border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20'
+                    } ${
+                      formData.email && !error
+                        ? 'border-blue-200 bg-blue-50/50'
+                        : 'bg-white'
+                    } disabled:bg-gray-50 disabled:cursor-not-allowed`}
                   />
+                  {formData.email && !error && (
+                    <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                      <CheckCircle className="h-5 w-5 text-green-500 animate-in fade-in zoom-in duration-300" />
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -196,8 +214,12 @@ export default function LoginForm() {
                   Password
                 </Label>
                 <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Lock className="h-5 w-5 text-gray-400 transition-colors duration-200 group-focus-within:text-blue-500" />
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
+                    <Lock className={`h-5 w-5 transition-all duration-300 ${
+                      formData.password 
+                        ? 'text-blue-500' 
+                        : 'text-gray-400 group-focus-within:text-blue-500'
+                    }`} />
                   </div>
                   <Input
                     id="password"
@@ -206,62 +228,79 @@ export default function LoginForm() {
                     autoComplete="current-password"
                     value={formData.password}
                     onChange={handleInputChange}
-                    placeholder="Enter your password (or any value for new users)"
+                    placeholder="Enter your password"
                     required
                     disabled={isLoading}
-                    className="pl-10 pr-10 transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className={`pl-12 pr-12 h-12 text-base border-2 transition-all duration-300 ${
+                      error && formData.password
+                        ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
+                        : 'border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20'
+                    } ${
+                      formData.password && !error
+                        ? 'border-blue-200 bg-blue-50/50'
+                        : 'bg-white'
+                    } disabled:bg-gray-50 disabled:cursor-not-allowed`}
                   />
-                  <p className="text-xs text-gray-500 mt-1">
-                    New users: Enter any password to be redirected to password setup
-                  </p>
                   <button
                     type="button"
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center transition-colors duration-200 hover:text-blue-500"
+                    className={`absolute inset-y-0 right-0 pr-4 flex items-center transition-all duration-300 z-10 ${
+                      showPassword 
+                        ? 'text-blue-500 hover:text-blue-600' 
+                        : 'text-gray-400 hover:text-gray-600'
+                    } disabled:opacity-50 disabled:cursor-not-allowed`}
                     onClick={() => setShowPassword(!showPassword)}
                     disabled={isLoading}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
                   >
                     {showPassword ? (
-                      <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                      <EyeOff className="h-5 w-5" />
                     ) : (
-                      <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                      <Eye className="h-5 w-5" />
                     )}
                   </button>
                 </div>
+                <p className="text-xs text-gray-500 mt-2 ml-1 flex items-center gap-1">
+                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-blue-100 text-blue-600 text-[10px] font-medium">i</span>
+                  New users: Enter any password to be redirected to password setup
+                </p>
               </div>
 
-              <div className="flex items-center justify-between animate-in fade-in slide-in-from-left-2 duration-500 delay-900">
-                <div className="flex items-center">
+              <div className="flex items-center justify-between animate-in fade-in slide-in-from-left-2 duration-500 delay-900 pt-1">
+                <div className="flex items-center group">
                   <input
                     id="remember-me"
                     name="remember-me"
                     type="checkbox"
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded transition-colors duration-200"
+                    className="h-4 w-4 text-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-0 border-gray-300 rounded transition-all duration-200 cursor-pointer"
                   />
-                  <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
+                  <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700 cursor-pointer hover:text-gray-900 transition-colors duration-200">
                     Remember me
                   </label>
                 </div>
 
                 <div className="text-sm">
-                  <a href="#" className="font-medium text-blue-600 hover:text-blue-500 transition-colors duration-200">
-                    Forgot your password?
+                  <a 
+                    href="/auth/forgot-password" 
+                    className="font-medium text-blue-600 hover:text-blue-700 transition-colors duration-200 underline-offset-2 hover:underline"
+                  >
+                    Forgot password?
                   </a>
                 </div>
               </div>
 
               <Button
                 type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg animate-in fade-in slide-in-from-bottom-2 duration-500 delay-1000"
-                disabled={isLoading}
+                className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-base rounded-lg transition-all duration-300 transform hover:scale-[1.02] hover:shadow-xl active:scale-100 shadow-md animate-in fade-in slide-in-from-bottom-2 duration-500 delay-1000 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                disabled={isLoading || !formData.email || !formData.password}
               >
                 {isLoading ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                     Signing in...
                   </>
                 ) : (
                   <>
-                    <Shield className="mr-2 h-4 w-4" />
+                    <Shield className="mr-2 h-5 w-5" />
                     Sign in
                   </>
                 )}
