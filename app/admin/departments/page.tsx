@@ -19,14 +19,12 @@ import {
   Building2, 
   Plus, 
   Search, 
-  Filter, 
   MoreHorizontal, 
   Edit, 
   Trash2, 
   Users,
   User,
-  Calendar,
-  TrendingUp
+  Calendar
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -94,6 +92,7 @@ export default function DepartmentManagement() {
     e.preventDefault()
     
     try {
+      console.log('[Departments] Creating department:', newDepartment)
       const response = await fetch('/api/admin/departments', {
         method: 'POST',
         headers: {
@@ -102,7 +101,9 @@ export default function DepartmentManagement() {
         body: JSON.stringify(newDepartment),
       })
 
+      console.log('[Departments] Create response status:', response.status)
       const data = await response.json()
+      console.log('[Departments] Create response data:', data)
 
       if (data.success) {
         toast.success('Department created successfully', {
@@ -116,11 +117,13 @@ export default function DepartmentManagement() {
         })
         fetchDepartments()
       } else {
+        console.error('[Departments] Create failed:', data.error)
         toast.error('Failed to create department', {
           description: data.error || 'An error occurred'
         })
       }
     } catch (error) {
+      console.error('[Departments] Create error:', error)
       toast.error('Connection error', {
         description: 'Unable to create department. Please try again.'
       })
@@ -128,30 +131,35 @@ export default function DepartmentManagement() {
   }
 
   const handleDeleteDepartment = async (departmentId: string, departmentName: string) => {
-    if (!confirm(`Are you sure you want to deactivate ${departmentName}?`)) {
+    if (!confirm(`Are you sure you want to delete ${departmentName}? This action cannot be undone.`)) {
       return
     }
 
     try {
+      console.log('[Departments] Deleting department:', departmentId)
       const response = await fetch(`/api/admin/departments?departmentId=${departmentId}`, {
         method: 'DELETE',
       })
 
+      console.log('[Departments] Delete response status:', response.status)
       const data = await response.json()
+      console.log('[Departments] Delete response data:', data)
 
       if (data.success) {
-        toast.success('Department deactivated successfully', {
-          description: `${departmentName} has been deactivated`
+        toast.success('Department deleted successfully', {
+          description: `${departmentName} has been deleted`
         })
         fetchDepartments()
       } else {
-        toast.error('Failed to deactivate department', {
+        console.error('[Departments] Delete failed:', data.error)
+        toast.error('Failed to delete department', {
           description: data.error || 'An error occurred'
         })
       }
     } catch (error) {
+      console.error('[Departments] Delete error:', error)
       toast.error('Connection error', {
-        description: 'Unable to deactivate department. Please try again.'
+        description: 'Unable to delete department. Please try again.'
       })
     }
   }
@@ -297,7 +305,7 @@ export default function DepartmentManagement() {
                         className="text-red-600"
                       >
                         <Trash2 className="h-4 w-4 mr-2" />
-                        Deactivate Department
+                        Delete Department
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>

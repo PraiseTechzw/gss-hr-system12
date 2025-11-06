@@ -67,6 +67,12 @@ export default function AuditLogs() {
 
   const fetchAuditLogs = async () => {
     try {
+      console.log('[Audit Logs] Starting fetch...', {
+        actionFilter,
+        tableFilter,
+        dateFilter,
+        offset: pagination.offset
+      })
       setLoading(true)
       
       const params = new URLSearchParams({
@@ -90,27 +96,35 @@ export default function AuditLogs() {
         params.append('endDate', endDate)
       }
 
+      console.log('[Audit Logs] Fetching with params:', params.toString())
       const response = await fetch(`/api/admin/audit-logs?${params}`)
+      console.log('[Audit Logs] Response status:', response.status)
       const data = await response.json()
+      console.log('[Audit Logs] Response data:', data)
 
       if (data.success) {
-        setAuditLogs(data.data.logs)
+        console.log('[Audit Logs] Setting logs:', data.data.logs?.length || 0)
+        console.log('[Audit Logs] Pagination:', data.data.pagination)
+        setAuditLogs(data.data.logs || [])
         setPagination(prev => ({
           ...prev,
-          total: data.data.pagination.total,
-          hasMore: data.data.pagination.hasMore
+          total: data.data.pagination?.total || 0,
+          hasMore: data.data.pagination?.hasMore || false
         }))
       } else {
+        console.error('[Audit Logs] Failed to fetch:', data.error)
         toast.error('Failed to fetch audit logs', {
           description: data.error || 'An error occurred'
         })
       }
     } catch (error) {
+      console.error('[Audit Logs] Fetch error:', error)
       toast.error('Connection error', {
         description: 'Unable to fetch audit logs. Please try again.'
       })
     } finally {
       setLoading(false)
+      console.log('[Audit Logs] Fetch complete')
     }
   }
 
