@@ -35,18 +35,13 @@ interface Department {
   name: string
   description?: string
   manager_id?: string
-  is_active: boolean
   created_at: string
   users?: {
     id: string
     full_name: string
     email: string
     role: string
-  }
-  employees?: {
-    id: string
-    active: boolean
-  }[]
+  } | null
   employee_count?: number
   total_employees?: number
 }
@@ -55,7 +50,6 @@ export default function DepartmentManagement() {
   const [departments, setDepartments] = useState<Department[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
-  const [statusFilter, setStatusFilter] = useState('active')
   const [showAddDepartment, setShowAddDepartment] = useState(false)
   const [newDepartment, setNewDepartment] = useState({
     name: '',
@@ -69,23 +63,30 @@ export default function DepartmentManagement() {
 
   const fetchDepartments = async () => {
     try {
+      console.log('[Departments] Starting fetch...')
       setLoading(true)
       const response = await fetch('/api/admin/departments')
+      console.log('[Departments] Response status:', response.status)
       const data = await response.json()
+      console.log('[Departments] Response data:', data)
 
       if (data.success) {
-        setDepartments(data.data)
+        console.log('[Departments] Setting departments:', data.data?.length || 0)
+        setDepartments(data.data || [])
       } else {
+        console.error('[Departments] Failed to fetch:', data.error)
         toast.error('Failed to fetch departments', {
           description: data.error || 'An error occurred'
         })
       }
     } catch (error) {
+      console.error('[Departments] Fetch error:', error)
       toast.error('Connection error', {
         description: 'Unable to fetch departments. Please try again.'
       })
     } finally {
       setLoading(false)
+      console.log('[Departments] Fetch complete')
     }
   }
 
@@ -158,10 +159,8 @@ export default function DepartmentManagement() {
   const filteredDepartments = departments.filter(dept => {
     const matchesSearch = dept.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          (dept.description && dept.description.toLowerCase().includes(searchTerm.toLowerCase()))
-    const matchesStatus = statusFilter === 'all' || 
-                         (statusFilter === 'active' && dept.is_active) ||
-                         (statusFilter === 'inactive' && !dept.is_active)
-    return matchesSearch && matchesStatus
+    // Departments table doesn't have is_active field, so we show all for now
+    return matchesSearch
   })
 
   if (loading) {
@@ -202,27 +201,6 @@ export default function DepartmentManagement() {
             </div>
           </div>
           <div className="flex gap-2">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline">
-                  <Filter className="h-4 w-4 mr-2" />
-                  Filter by Status
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => setStatusFilter('all')}>
-                  All Departments
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setStatusFilter('active')}>
-                  Active Only
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setStatusFilter('inactive')}>
-                  Inactive Only
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
             <Button onClick={() => setShowAddDepartment(true)}>
               <Plus className="h-4 w-4 mr-2" />
               Add Department
@@ -355,13 +333,6 @@ export default function DepartmentManagement() {
                     </div>
                   </div>
 
-                  {/* Status */}
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Status</span>
-                    <Badge variant={department.is_active ? 'default' : 'secondary'}>
-                      {department.is_active ? 'Active' : 'Inactive'}
-                    </Badge>
-                  </div>
 
                   {/* Created Date */}
                   <div className="flex items-center space-x-2 text-xs text-gray-500">
@@ -380,12 +351,12 @@ export default function DepartmentManagement() {
               <Building2 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-gray-900 mb-2">No departments found</h3>
               <p className="text-gray-600 mb-4">
-                {searchTerm || statusFilter !== 'all' 
-                  ? 'Try adjusting your search or filter criteria.'
+                {searchTerm
+                  ? 'Try adjusting your search criteria.'
                   : 'Get started by creating your first department.'
                 }
               </p>
-              {!searchTerm && statusFilter === 'all' && (
+              {!searchTerm && (
                 <Button onClick={() => setShowAddDepartment(true)}>
                   <Plus className="h-4 w-4 mr-2" />
                   Add First Department
