@@ -67,35 +67,60 @@ export default function AdminDashboard() {
   const router = useRouter()
 
   useEffect(() => {
+    console.log('[Dashboard] Component mounted, fetching data...')
     fetchDashboardData()
   }, [])
 
+  useEffect(() => {
+    console.log('[Dashboard] Stats updated:', stats)
+  }, [stats])
+
+  useEffect(() => {
+    console.log('[Dashboard] User distribution updated:', userDistribution)
+  }, [userDistribution])
+
   const fetchDashboardData = async () => {
     try {
+      console.log('[Dashboard] Starting data fetch...')
       setIsLoading(true)
+      
       const response = await fetch('/api/admin/dashboard', {
         credentials: 'include'
       })
 
+      console.log('[Dashboard] Response status:', response.status)
+      console.log('[Dashboard] Response ok:', response.ok)
+
       const result = await response.json()
+      console.log('[Dashboard] Response data:', result)
 
       if (result.success && result.data) {
+        console.log('[Dashboard] Setting stats:', result.data.stats)
+        console.log('[Dashboard] Setting user distribution:', result.data.userDistribution)
+        console.log('[Dashboard] Setting recent users:', result.data.recentUsers?.length || 0)
+        console.log('[Dashboard] Setting recent activity:', result.data.recentActivity?.length || 0)
+        
         setStats(result.data.stats)
         setUserDistribution(result.data.userDistribution || {})
-        setRecentUsers(result.data.recentUsers)
-        setRecentActivity(result.data.recentActivity)
+        setRecentUsers(result.data.recentUsers || [])
+        setRecentActivity(result.data.recentActivity || [])
+        
+        console.log('[Dashboard] State updated successfully')
       } else {
+        console.error('[Dashboard] Failed response:', result)
         toast.error("Failed to load dashboard data", {
           description: result.error || "An error occurred"
         })
       }
     } catch (error) {
-      console.error("Dashboard fetch error:", error)
+      console.error("[Dashboard] Fetch error:", error)
+      console.error("[Dashboard] Error details:", error instanceof Error ? error.message : error)
       toast.error("Connection error", {
         description: "Unable to fetch dashboard data. Please try again."
       })
     } finally {
       setIsLoading(false)
+      console.log('[Dashboard] Loading complete')
     }
   }
 
@@ -230,6 +255,53 @@ export default function AdminDashboard() {
         </Card>
       </div>
 
+      {/* User Distribution */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <PieChart className="h-5 w-5" />
+            User Distribution by Role
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {Object.keys(userDistribution).length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {Object.entries(userDistribution).map(([role, count]) => (
+                <div key={role} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2 rounded-lg ${
+                      role === 'admin' ? 'bg-red-100' :
+                      role === 'manager' ? 'bg-blue-100' :
+                      role === 'hr' ? 'bg-green-100' :
+                      'bg-gray-100'
+                    }`}>
+                      <Shield className={`h-4 w-4 ${
+                        role === 'admin' ? 'text-red-600' :
+                        role === 'manager' ? 'text-blue-600' :
+                        role === 'hr' ? 'text-green-600' :
+                        'text-gray-600'
+                      }`} />
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm capitalize">{role}</p>
+                      <p className="text-xs text-gray-500">Users</p>
+                    </div>
+                  </div>
+                  <Badge variant="outline" className="text-lg font-bold">
+                    {count}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-6">
+              <Users className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+              <p className="text-gray-600">No user distribution data available</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Main Content Grid */}
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Recent Users */}
@@ -305,6 +377,13 @@ export default function AdminDashboard() {
                   <span className="font-medium">Total Users</span>
                 </div>
                 <Badge variant="outline">{stats.totalUsers}</Badge>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-cyan-50 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <Building2 className="h-5 w-5 text-cyan-600" />
+                  <span className="font-medium">Total Departments</span>
+                </div>
+                <Badge variant="outline">{stats.totalDepartments}</Badge>
               </div>
               <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
                 <div className="flex items-center gap-3">

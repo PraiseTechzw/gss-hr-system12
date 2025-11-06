@@ -27,6 +27,10 @@ export async function GET(request: NextRequest) {
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_URL_SUPABASE_SERVICE_ROLE_KEY!
     const supabase = createClient(supabaseUrl, serviceRoleKey)
 
+    console.log('[Dashboard API] Starting data fetch...')
+    console.log('[Dashboard API] Supabase URL:', supabaseUrl ? 'Set' : 'Missing')
+    console.log('[Dashboard API] Service Role Key:', serviceRoleKey ? 'Set' : 'Missing')
+
     // Fetch statistics in parallel
     const [
       usersResult,
@@ -84,6 +88,15 @@ export async function GET(request: NextRequest) {
         .select('role')
     ])
 
+    console.log('[Dashboard API] Parallel queries completed')
+    console.log('[Dashboard API] Users count:', usersResult.count)
+    console.log('[Dashboard API] Employees count:', employeesResult.count)
+    console.log('[Dashboard API] Departments count:', departmentsResult.count)
+    console.log('[Dashboard API] Deployments count:', deploymentsResult.count)
+    console.log('[Dashboard API] Leaves count:', leavesResult.count)
+    console.log('[Dashboard API] Recent users:', recentUsersResult.data?.length || 0)
+    console.log('[Dashboard API] User role distribution data:', userRoleDistributionResult.data?.length || 0)
+
     // Fetch recent activity separately to avoid join issues
     const { data: activityData } = await supabase
       .from('system_activity')
@@ -129,7 +142,11 @@ export async function GET(request: NextRequest) {
       roleDistribution[role] = (roleDistribution[role] || 0) + 1
     })
 
-    return NextResponse.json({
+    console.log('[Dashboard API] Role distribution calculated:', roleDistribution)
+    console.log('[Dashboard API] Total payroll:', totalPayroll)
+    console.log('[Dashboard API] Activity items:', formattedActivity.length)
+
+    const responseData = {
       success: true,
       data: {
         stats: {
@@ -144,7 +161,11 @@ export async function GET(request: NextRequest) {
         recentUsers: recentUsersResult.data || [],
         recentActivity: formattedActivity
       }
-    })
+    }
+
+    console.log('[Dashboard API] Final response data:', JSON.stringify(responseData, null, 2))
+
+    return NextResponse.json(responseData)
 
   } catch (error) {
     console.error('Dashboard fetch error:', error)
