@@ -38,10 +38,10 @@ export default async function DashboardLayout({
   } : {
     id: tokenResult.user.id,
     email: tokenResult.user.email,
-    first_name: 'Admin',
-    last_name: 'User',
-    full_name: 'Admin User',
-    role: 'admin' as const,
+    first_name: tokenResult.user.full_name?.split(' ')[0] || 'User',
+    last_name: tokenResult.user.full_name?.split(' ').slice(1).join(' ') || '',
+    full_name: tokenResult.user.full_name || tokenResult.user.email,
+    role: tokenResult.user.role as 'admin' | 'manager' | 'hr',
     status: 'active'
   }
   
