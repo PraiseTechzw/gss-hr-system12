@@ -70,30 +70,7 @@ export class AuthService {
       
       if (!user) {
         console.log("[Auth] No user found with email:", email)
-        
-        // Temporary hardcoded admin for testing
-        if (email === 'admin@geniussecurity.co.zw' && password === 'admin123') {
-          console.log("[Auth] Using hardcoded admin user for testing")
-          user = {
-            id: 'temp-admin-id',
-            email: 'admin@geniussecurity.co.zw',
-            password_hash: await bcrypt.hash('admin123', 12),
-            first_name: 'Admin',
-            last_name: 'User',
-            full_name: 'Admin User',
-            role: 'admin',
-            department_id: null,
-            position: 'System Administrator',
-            status: 'active',
-            phone: null,
-            last_login: null,
-            created_by: null,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          }
-        } else {
-          return { success: false, error: "Invalid credentials" }
-        }
+        return { success: false, error: "Invalid credentials" }
       }
 
       console.log("[Auth] User found:", { id: user.id, email: user.email, role: user.role })
