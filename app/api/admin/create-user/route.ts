@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
     
     // Use service role key for admin operations (bypasses RLS)
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-    const serviceRoleKey = process.env.NEXT_PUBLIC_SUPABASE_URL_SUPABASE_SERVICE_ROLE_KEY!
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_URL_SUPABASE_SERVICE_ROLE_KEY!
     
     const supabase = createClient(supabaseUrl, serviceRoleKey)
     console.log("[Admin] Service role client created")
