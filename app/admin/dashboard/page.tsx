@@ -15,7 +15,9 @@ import {
   Clock,
   CheckCircle,
   Calendar,
-  UserPlus
+  UserPlus,
+  PieChart,
+  Building2
 } from "lucide-react"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
@@ -161,7 +163,7 @@ export default function AdminDashboard() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#a2141e] mx-auto"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#150057] mx-auto"></div>
           <p className="mt-2 text-gray-600">Loading dashboard...</p>
         </div>
       </div>
@@ -173,7 +175,7 @@ export default function AdminDashboard() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+          <h1 className="text-3xl font-bold text-[#150057]">Admin Dashboard</h1>
           <p className="text-gray-600 mt-1">System overview and statistics</p>
         </div>
         <Badge className="bg-green-100 text-green-800 border-green-200">

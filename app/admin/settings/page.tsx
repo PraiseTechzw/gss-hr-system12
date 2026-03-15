@@ -158,7 +158,7 @@ export default function SystemSettings() {
       <DashboardLayout>
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#150057] mx-auto mb-4"></div>
             <p className="text-gray-600">Loading settings...</p>
           </div>
         </div>
@@ -171,7 +171,7 @@ export default function SystemSettings() {
       <div className="space-y-6">
         {/* Page Header */}
         <div className="animate-in fade-in slide-in-from-top-4 duration-500">
-          <h1 className="text-3xl font-bold text-gray-900">System Settings</h1>
+          <h1 className="text-3xl font-bold text-[#150057]">System Settings</h1>
           <p className="text-gray-600 mt-2">
             Configure your HR system settings, company information, and compliance rates.
           </p>

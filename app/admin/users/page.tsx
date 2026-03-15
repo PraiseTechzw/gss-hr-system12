@@ -235,7 +235,7 @@ export default function UserManagement() {
       <DashboardLayout>
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#150057] mx-auto mb-4"></div>
             <p className="text-gray-600">Loading users...</p>
           </div>
         </div>
@@ -248,7 +248,7 @@ export default function UserManagement() {
       <div className="space-y-6">
         {/* Page Header */}
         <div className="animate-in fade-in slide-in-from-top-4 duration-500">
-          <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
+          <h1 className="text-3xl font-bold text-[#150057]">User Management</h1>
           <p className="text-gray-600 mt-2">
             Manage system users, roles, and permissions.
           </p>
@@ -391,7 +391,7 @@ export default function UserManagement() {
                       <div className="flex items-center gap-2">
                         <h3 className="text-lg font-semibold text-gray-900">{user.full_name}</h3>
                         {user.requires_password_setup && (
-                          <AlertCircle className="h-4 w-4 text-orange-500" title="Password setup required" />
+                          <AlertCircle className="h-4 w-4 text-orange-500" />
                         )}
                       </div>
                       <p className="text-sm text-gray-600 flex items-center">

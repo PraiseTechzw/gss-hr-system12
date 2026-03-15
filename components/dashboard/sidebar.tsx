@@ -21,7 +21,8 @@ import {
   ChevronRight,
   Building2,
   Menu,
-  X
+  X,
+  Activity
 } from 'lucide-react'
 import AppLogo from '@/components/ui/app-logo'
 
@@ -53,14 +54,14 @@ const navigation = [
     roles: ['admin', 'manager', 'hr']
   },
   {
-    name: 'Attendance',
+    name: 'Leave & Attendance',
     href: '/attendance',
     icon: Clock,
     roles: ['admin', 'manager', 'hr']
   },
   {
-    name: 'Leave Requests',
-    href: '/leave-requests',
+    name: 'Approvals',
+    href: '/approvals',
     icon: FileText,
     roles: ['admin', 'manager', 'hr']
   },
@@ -100,6 +101,12 @@ const adminNavigation = [
   {
     name: 'User Management',
     href: '/admin/users',
+    icon: Users,
+    roles: ['admin']
+  },
+  {
+    name: 'Create User',
+    href: '/admin/create-user',
     icon: UserPlus,
     roles: ['admin']
   },
@@ -116,9 +123,15 @@ const adminNavigation = [
     roles: ['admin']
   },
   {
+    name: 'Admin Reports',
+    href: '/admin/reports',
+    icon: BarChart3,
+    roles: ['admin']
+  },
+  {
     name: 'System Health',
     href: '/admin/system-health',
-    icon: BarChart3,
+    icon: Activity,
     roles: ['admin']
   },
   {

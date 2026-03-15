@@ -1,21 +1,19 @@
 import DashboardLayout from '@/components/dashboard/dashboard-layout'
-import AdminOverview from '@/components/admin/admin-overview'
+import CreateUserForm from '@/components/admin/create-user-form'
 
-export default function AdminDashboard() {
+export default function CreateUserPage() {
   return (
     <DashboardLayout>
-      <div className="space-y-6">
-        {/* Page Header */}
+      <div className="max-w-4xl mx-auto space-y-6">
         <div className="animate-in fade-in slide-in-from-top-4 duration-500">
-          <h1 className="text-3xl font-bold text-[#150057]">Admin Dashboard</h1>
+          <h1 className="text-3xl font-bold text-[#150057]">Create User Account</h1>
           <p className="text-gray-600 mt-2">
-            Manage users, departments, and system settings for your HR system.
+            Provision a new account for an administrator, manager, or HR professional.
           </p>
         </div>
 
-        {/* Admin Overview Component */}
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-200">
-          <AdminOverview />
+          <CreateUserForm />
         </div>
       </div>
     </DashboardLayout>

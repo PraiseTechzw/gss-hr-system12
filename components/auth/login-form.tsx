@@ -147,15 +147,15 @@ export default function LoginForm() {
               />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">GSS HR</h1>
-              <p className="text-base text-gray-500">Human Resources System</p>
+              <h1 className="text-3xl font-bold text-[#150057]">GSS HR</h1>
+              <p className="text-sm font-semibold text-[#a2141e]">Human Resources System</p>
             </div>
           </div>
 
           {/* Login Form */}
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
             <div className="mb-6">
-              <h2 className="text-3xl font-bold text-gray-900 animate-in fade-in slide-in-from-left-2 duration-500 delay-400">Welcome back</h2>
+              <h2 className="text-3xl font-bold text-[#150057] animate-in fade-in slide-in-from-left-2 duration-500 delay-400">Welcome back</h2>
               <p className="mt-2 text-sm text-gray-600 animate-in fade-in slide-in-from-left-2 duration-500 delay-500">
                 Sign in to your account to continue
               </p>
@@ -193,11 +193,11 @@ export default function LoginForm() {
                     disabled={isLoading}
                     className={`pl-12 pr-4 h-12 text-base border-2 transition-all duration-300 ${
                       error && formData.email
-                        ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
-                        : 'border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20'
+                        ? 'border-red-300 focus:border-[#a2141e] focus:ring-[#a2141e]'
+                        : 'border-gray-200 focus:border-[#150057] focus:ring-2 focus:ring-[#150057]/20'
                     } ${
                       formData.email && !error
-                        ? 'border-blue-200 bg-blue-50/50'
+                        ? 'border-[#150057]/20 bg-[#150057]/5'
                         : 'bg-white'
                     } disabled:bg-gray-50 disabled:cursor-not-allowed`}
                   />
@@ -233,11 +233,11 @@ export default function LoginForm() {
                     disabled={isLoading}
                     className={`pl-12 pr-12 h-12 text-base border-2 transition-all duration-300 ${
                       error && formData.password
-                        ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
-                        : 'border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20'
+                        ? 'border-red-300 focus:border-[#a2141e] focus:ring-[#a2141e]'
+                        : 'border-gray-200 focus:border-[#150057] focus:ring-2 focus:ring-[#150057]/20'
                     } ${
                       formData.password && !error
-                        ? 'border-blue-200 bg-blue-50/50'
+                        ? 'border-[#150057]/20 bg-[#150057]/5'
                         : 'bg-white'
                     } disabled:bg-gray-50 disabled:cursor-not-allowed`}
                   />
@@ -281,7 +281,7 @@ export default function LoginForm() {
                 <div className="text-sm">
                   <a 
                     href="/auth/forgot-password" 
-                    className="font-medium text-blue-600 hover:text-blue-700 transition-colors duration-200 underline-offset-2 hover:underline"
+                    className="font-medium text-[#a2141e] hover:text-[#8a1119] transition-colors duration-200 underline-offset-2 hover:underline"
                   >
                     Forgot password?
                   </a>
@@ -290,7 +290,7 @@ export default function LoginForm() {
 
               <Button
                 type="submit"
-                className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-base rounded-lg transition-all duration-300 transform hover:scale-[1.02] hover:shadow-xl active:scale-100 shadow-md animate-in fade-in slide-in-from-bottom-2 duration-500 delay-1000 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                className="w-full h-12 bg-[#150057] hover:bg-[#0d003a] text-white font-semibold text-base rounded-lg transition-all duration-300 transform hover:scale-[1.02] hover:shadow-xl active:scale-100 shadow-md animate-in fade-in slide-in-from-bottom-2 duration-500 delay-1000 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 disabled={isLoading || !formData.email || !formData.password}
               >
                 {isLoading ? (
@@ -301,7 +301,7 @@ export default function LoginForm() {
                 ) : (
                   <>
                     <Shield className="mr-2 h-5 w-5" />
-                    Sign in
+                    Sign in to Portal
                   </>
                 )}
               </Button>
@@ -331,10 +331,10 @@ export default function LoginForm() {
       </div>
 
       {/* Right Side - Hero Section */}
-      <div className="hidden lg:flex lg:flex-1 lg:flex-col lg:justify-center lg:px-8 bg-gradient-to-br from-blue-600 to-red-600 relative overflow-hidden">
+      <div className="hidden lg:flex lg:flex-1 lg:flex-col lg:justify-center lg:px-8 bg-gradient-to-br from-[#150057] to-[#a2141e] relative overflow-hidden">
         {/* Background Pattern */}
-        <div className="absolute inset-0 bg-black/10"></div>
-        <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/5 to-transparent"></div>
+        <div className="absolute inset-0 bg-black/20"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_transparent_0%,_black_100%)] opacity-40"></div>
         
         {/* Content */}
         <div className="relative z-10 text-center text-white">

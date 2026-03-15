@@ -16,6 +16,8 @@ import {
   Star,
   UserPlus,
   LogOut,
+  Building2,
+  Activity
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
@@ -159,10 +161,28 @@ export function AppSidebar({ user: propUser }: AppSidebarProps = {}) {
       isAdmin: true,
     },
     {
-      name: "Admin Settings",
-      href: "/admin/settings",
-      icon: Settings,
-      description: "System configuration",
+      name: "Department Management",
+      href: "/admin/departments",
+      icon: Building2,
+      description: "Manage company departments",
+      category: "admin",
+      roles: ["admin"],
+      isAdmin: true,
+    },
+    {
+      name: "Audit Logs",
+      href: "/admin/audit-logs",
+      icon: FileText,
+      description: "View system audit logs",
+      category: "admin",
+      roles: ["admin"],
+      isAdmin: true,
+    },
+    {
+      name: "System Health",
+      href: "/admin/system-health",
+      icon: Activity,
+      description: "Monitor system status",
       category: "admin",
       roles: ["admin"],
       isAdmin: true,
@@ -172,6 +192,15 @@ export function AppSidebar({ user: propUser }: AppSidebarProps = {}) {
       href: "/admin/reports",
       icon: FileText,
       description: "System analytics",
+      category: "admin",
+      roles: ["admin"],
+      isAdmin: true,
+    },
+    {
+      name: "Admin Settings",
+      href: "/admin/settings",
+      icon: Settings,
+      description: "System configuration",
       category: "admin",
       roles: ["admin"],
       isAdmin: true,
@@ -214,6 +243,11 @@ export function AppSidebar({ user: propUser }: AppSidebarProps = {}) {
         return permissions.canManageUsers
       case "Create User":
         return permissions.canCreateUsers
+      case "Department Management":
+        return permissions.canManageDepartments
+      case "Audit Logs":
+        return permissions.canViewSystemActivity
+      case "System Health":
       case "Admin Dashboard":
       case "Admin Settings":
       case "Admin Reports":
