@@ -17,15 +17,15 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: "GSS HR & Payroll Management System",
-  description: "GSS HR & Payroll Management System",
+  title: "GSS HR & Payroll - Genius Security Services",
+  description: "Advanced Human Resource and Payroll Management System for Genius Security Services. Manage employees, deployments, and compliance with ease.",
   authors: [{ name: "Genius Security Services", url: "https://geniussecurityservices.co.zw" }],
   icons: {
     icon: "/logo.png",
     shortcut: "/logo.png",
     apple: "/logo.png",
   },
-    generator: 'v0.app'
+  viewport: "width=device-width, initial-scale=1, maximum-scale=1",
 }
 
 export default function RootLayout({
