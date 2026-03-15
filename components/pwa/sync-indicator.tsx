@@ -8,29 +8,46 @@ export function SyncIndicator() {
   const [syncing, setSyncing] = useState<boolean>(false)
 
   useEffect(() => {
+    let isInitial = true
+
     const onOnline = () => {
       setOnline(true)
-      toast.success("Connection restored", {
-        description: "You're back online and data will sync automatically"
-      })
+      if (!isInitial) {
+        toast.success("Connection restored", {
+          description: "You're back online and data will sync automatically",
+          id: "connection-status"
+        })
+      }
     }
+
     const onOffline = () => {
       setOnline(false)
+      isInitial = false
       toast.warning("You're offline", {
-        description: "Changes will be saved locally and synced when online"
+        description: "Changes will be saved locally and synced when online",
+        id: "connection-status"
       })
     }
+
     const onSyncStart = () => {
       setSyncing(true)
-      toast.loading("Syncing data...", {
-        description: "Synchronizing with server"
-      })
+      if (!isInitial) {
+        toast.loading("Syncing data...", {
+          description: "Synchronizing with server",
+          id: "sync-progress"
+        })
+      }
     }
+
     const onSyncEnd = () => {
       setSyncing(false)
-      toast.success("Sync complete", {
-        description: "All data has been synchronized"
-      })
+      if (!isInitial) {
+        toast.success("Sync complete", {
+          description: "All data has been synchronized",
+          id: "sync-progress"
+        })
+      }
+      isInitial = false
     }
 
     window.addEventListener("online", onOnline)
